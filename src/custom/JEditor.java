@@ -7,7 +7,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.undo.UndoManager;
-import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -32,14 +31,13 @@ public class JEditor extends JTextPane {
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {}
+            public void removeUpdate(DocumentEvent e) {
+            }
+
             @Override
-            public void changedUpdate(DocumentEvent e) {}
+            public void changedUpdate(DocumentEvent e) {
+            }
         });
-
-
-
-
 
 
         addKeyListener(new KeyAdapter() {
@@ -50,52 +48,48 @@ public class JEditor extends JTextPane {
 
                 AttributeSet attributeSet = currentAttr[0];
 
-                if(selectingText){
+                if (selectingText) {
+                    currentAttr[0].removeAttributes(currentAttr[0]);
                     attributeSet = getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes();
                 }
 
 
-                AttributeSet oldAttributes = null;
+                AttributeSet preChangeAttr = null;
 
-                if(e.isControlDown()){
-
-
-                    oldAttributes = currentAttr[0].copyAttributes();
+                if (e.isControlDown()) {
 
 
+                    preChangeAttr = currentAttr[0].copyAttributes();
 
 
-                    if(e.getKeyCode() == VK_I){
+                    if (e.getKeyCode() == VK_I) {
                         StyleConstants.setItalic(currentAttr[0], !StyleConstants.isItalic(attributeSet));
                     }
-                    if(e.getKeyCode() == VK_B){
+                    if (e.getKeyCode() == VK_B) {
                         StyleConstants.setBold(currentAttr[0], !StyleConstants.isBold(attributeSet));
                     }
-                    if(e.getKeyCode() == VK_U){
+                    if (e.getKeyCode() == VK_U) {
                         StyleConstants.setUnderline(currentAttr[0], !StyleConstants.isUnderline(attributeSet));
                     }
-                    if(e.getKeyCode() == VK_COMMA){
+                    if (e.getKeyCode() == VK_COMMA) {
                         StyleConstants.setSubscript(currentAttr[0], !StyleConstants.isSubscript(attributeSet));
                     }
-                    if(e.getKeyCode() == VK_PERIOD){
+                    if (e.getKeyCode() == VK_PERIOD) {
                         StyleConstants.setSuperscript(currentAttr[0], !StyleConstants.isSuperscript(attributeSet));
                     }
-                    if(e.getKeyCode() == VK_UP){
-                        int oldSize = StyleConstants.getFontSize(currentAttr[0]);
+                    if (e.getKeyCode() == VK_UP) {
+                        int oldSize = StyleConstants.getFontSize(attributeSet);
                         StyleConstants.setFontSize(currentAttr[0], oldSize + 1);
                     }
-                    if(e.getKeyCode() == VK_DOWN){
-                        int oldSize = StyleConstants.getFontSize(currentAttr[0]);
+                    if (e.getKeyCode() == VK_DOWN) {
+                        int oldSize = StyleConstants.getFontSize(attributeSet);
                         StyleConstants.setFontSize(currentAttr[0], oldSize - 1);
                     }
 
 
-
-
-
                 }
 
-                if(selectingText){
+                if (selectingText) {
                     getStyledDocument().setCharacterAttributes(
                             getSelectionStart(),
                             selectedLength,
@@ -103,44 +97,22 @@ public class JEditor extends JTextPane {
                             false
                     );
 
-                    if(oldAttributes != null)
-                        currentAttr[0] = (SimpleAttributeSet) oldAttributes;
-
-
-                    //Modifications done to selected text have to be undone somehow
-
-
+                    if (preChangeAttr != null)
+                        currentAttr[0] = (SimpleAttributeSet) preChangeAttr;
                 }
 
 
-
-
-
-
-
-                if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_Z){
+                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_Z) {
                     manager.undo();
                 }
-                if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_Y){
+                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_Y) {
                     manager.redo();
                 }
-
 
 
             }
         });
 
 
-
-
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-
-        Graphics2D graphics2D = (Graphics2D) g;
-        graphics2D.getTransform().setToScale(2, 2);
-
-        super.paintComponent(g);
     }
 }
