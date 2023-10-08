@@ -1,7 +1,7 @@
-package custom.designer;
+package custom.diagram;
 
 import custom.Appearance;
-import custom.designer.actions.*;
+import custom.diagram.actions.*;
 
 import javax.swing.*;
 import java.awt.*;

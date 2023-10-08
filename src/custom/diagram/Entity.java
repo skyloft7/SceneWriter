@@ -1,7 +1,6 @@
-package custom.c4;
+package custom.diagram;
 
-import custom.c4.compose.DataComponent;
-import custom.designer.JDiagramEditor;
+import custom.diagram.compose.DataComponent;
 
 import java.awt.*;
 import java.util.HashMap;

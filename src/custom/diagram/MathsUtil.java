@@ -1,4 +1,4 @@
-package custom.designer;
+package custom.diagram;
 
 public class MathsUtil {
     public static float floatClamp(float input, float max, float min){

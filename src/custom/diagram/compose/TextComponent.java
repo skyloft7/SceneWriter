@@ -1,4 +1,4 @@
-package custom.c4.compose;
+package custom.diagram.compose;
 
 public class TextComponent extends DataComponent {
     public String Text = "";

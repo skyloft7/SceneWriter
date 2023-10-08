@@ -1,11 +1,8 @@
-package custom.c4;
+package custom.diagram;
 
 import custom.Appearance;
-import custom.c4.compose.TextComponent;
-import custom.c4.compose.*;
-import custom.designer.FontMetricsManager;
-import custom.designer.JDiagramEditor;
-import custom.designer.MathsUtil;
+import custom.diagram.compose.TextComponent;
+import custom.diagram.compose.*;
 
 import javax.swing.*;
 import java.awt.*;

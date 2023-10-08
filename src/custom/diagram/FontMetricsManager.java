@@ -1,4 +1,4 @@
-package custom.designer;
+package custom.diagram;
 
 import java.awt.*;
 import java.util.HashSet;

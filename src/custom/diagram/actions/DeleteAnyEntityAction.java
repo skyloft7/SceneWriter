@@ -1,6 +1,6 @@
-package custom.designer.actions;
+package custom.diagram.actions;
 
-import custom.designer.JDiagramEditor;
+import custom.diagram.JDiagramEditor;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;

@@ -1,11 +1,8 @@
-package custom.c4;
+package custom.diagram;
 
 import custom.Appearance;
-import custom.c4.compose.*;
-import custom.c4.compose.TextComponent;
-import custom.designer.Canvas;
-import custom.designer.FontMetricsManager;
-import custom.designer.JDiagramEditor;
+import custom.diagram.compose.*;
+import custom.diagram.compose.TextComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,7 +89,7 @@ public class Link extends Entity {
             @Override
             public void mouseMoved(MouseEvent e) {
 
-                custom.designer.Canvas canvas = sketchDesigner.getSketch().getCurrentCanvas();
+                Canvas canvas = sketchDesigner.getSketch().getCurrentCanvas();
                 if(getLinkState() == LinkState.UNDECIDED) {
                     mouse = canvas.toCanvasSpace(e.getPoint());
                     sketchDesigner.repaint();

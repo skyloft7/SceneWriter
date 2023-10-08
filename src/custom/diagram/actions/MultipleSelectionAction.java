@@ -1,9 +1,9 @@
-package custom.designer.actions;
+package custom.diagram.actions;
 
-import custom.c4.Entity;
-import custom.c4.Node;
-import custom.designer.Canvas;
-import custom.designer.JDiagramEditor;
+import custom.diagram.Entity;
+import custom.diagram.Node;
+import custom.diagram.Canvas;
+import custom.diagram.JDiagramEditor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -108,7 +108,7 @@ public class MultipleSelectionAction extends UserAction {
 
                     end = e.getPoint();
 
-                    custom.designer.Canvas currentCanvas = sd.getSketch().getCurrentCanvas();
+                    Canvas currentCanvas = sd.getSketch().getCurrentCanvas();
 
                     multipleSelectedEntities.clear();
 

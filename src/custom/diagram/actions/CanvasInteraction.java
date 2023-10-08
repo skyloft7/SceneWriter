@@ -1,7 +1,7 @@
-package custom.designer.actions;
+package custom.diagram.actions;
 
-import custom.designer.Canvas;
-import custom.designer.JDiagramEditor;
+import custom.diagram.Canvas;
+import custom.diagram.JDiagramEditor;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,8 +1,4 @@
-package custom.designer;
-
-import custom.c4.Entity;
-import custom.c4.Link;
-import custom.c4.Node;
+package custom.diagram;
 
 import java.awt.*;
 import java.util.LinkedList;
