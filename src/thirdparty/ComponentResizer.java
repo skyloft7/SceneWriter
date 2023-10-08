@@ -7,8 +7,6 @@
 
 package thirdparty;
 
-import custom.JDockableWindow;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -328,9 +326,6 @@ public class ComponentResizer extends MouseAdapter
             jc.setAutoscrolls( false );
         }
 
-        if(source instanceof JDockableWindow){
-            ((JDockableWindow) source).setFloatable(false);
-        }
 
 
     }
@@ -351,9 +346,7 @@ public class ComponentResizer extends MouseAdapter
             ((JComponent)source).setAutoscrolls( autoscrolls );
         }
 
-        if(source instanceof JDockableWindow){
-            ((JDockableWindow) source).setFloatable(true);
-        }
+
 
     }
 
@@ -429,6 +422,7 @@ public class ComponentResizer extends MouseAdapter
         }
 
         source.setPreferredSize(new Dimension(width, height));
+
         source.repaint();
         source.revalidate();
         //source.setBounds(x, y, width, height);
