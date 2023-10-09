@@ -1,5 +1,7 @@
 package custom;
 
+import flatlaf.FlatLafUtils;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -34,7 +36,7 @@ public class JDockspace extends JPanel {
 
         if(showOverlay) {
 
-            graphics2D.setColor(Color.CYAN);
+            graphics2D.setColor(FlatLafUtils.accentColor);
             graphics2D.setComposite(alphaComposite);
 
 

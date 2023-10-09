@@ -10,13 +10,35 @@ import java.awt.event.*;
 public class JDockableWindow extends JPanel {
 
 
-    private Object layoutArgs;
+    private Object myDockspacePos;
     private int myDockDistance = 0;
 
+    private Dimension vPreferredSize, hPreferredSize;
+    private int amnestySize = 50;
+
+    //Test replacement docking with axis-specific sizes
+
     public JDockableWindow(String title){
+        vPreferredSize = new Dimension(getPreferredSize().width, getPreferredSize().height + amnestySize);
+        hPreferredSize = new Dimension(getPreferredSize().width + amnestySize, getPreferredSize().height);
 
         ComponentResizer componentResizer = new ComponentResizer();
-        componentResizer.registerComponent(this);
+
+
+
+        componentResizer.registerComponent(this, resizeAxis -> {
+            if(resizeAxis == ResizeListener.ResizeAxis.HORIZONTAL){
+                hPreferredSize = getSize();
+            }
+            if(resizeAxis == ResizeListener.ResizeAxis.VERTICAL){
+                vPreferredSize = getSize();
+            }
+        });
+
+
+
+
+
         setLayout(new BorderLayout());
 
         setBorder(BorderFactory.createTitledBorder(title));
@@ -28,12 +50,18 @@ public class JDockableWindow extends JPanel {
 
                 if(getParent() instanceof JDockspace){
                     ((JDockspace) getParent()).showOverlay();
-
                 }
+
             }
         });
 
         addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                getParent().requestFocusInWindow();
+            }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
@@ -54,19 +82,23 @@ public class JDockableWindow extends JPanel {
 
                     //East
                     if(p.getX() > parent.getBounds().width - myDockDistance){
+                        setPreferredSize(hPreferredSize);
                         setPosition(parent, BorderLayout.EAST);
                     }
                     //West
                     if(p.getX() < myDockDistance){
+                        setPreferredSize(hPreferredSize);
                         setPosition(parent, BorderLayout.WEST);
                     }
 
                     //North
                     if(p.getY() < myDockDistance){
+                        setPreferredSize(vPreferredSize);
                         setPosition(parent, BorderLayout.NORTH);
                     }
                     //South
                     if(p.getY() > parent.getBounds().height - myDockDistance){
+                        setPreferredSize(vPreferredSize);
                         setPosition(parent, BorderLayout.SOUTH);
                     }
 
@@ -100,7 +132,7 @@ public class JDockableWindow extends JPanel {
 
                             JDockableWindow.this.setPreferredSize(jDialog.getSize());
 
-                            parent.add(JDockableWindow.this, layoutArgs);
+                            parent.add(JDockableWindow.this, myDockspacePos);
                             parent.revalidate();
                             parent.repaint();
                         }
@@ -115,25 +147,39 @@ public class JDockableWindow extends JPanel {
         });
     }
 
-    private void setPosition(Container parent, Object args){
+    private void setPosition(Container parent, Object newDockspacePos){
+
+        if(parent instanceof JDockspace){
+            JDockspace jDockspace = (JDockspace) parent;
+
+            //Is there another component already here?
+            JDockableWindow existingWindow = (JDockableWindow) ((BorderLayout) jDockspace.getLayout()).getLayoutComponent(newDockspacePos);
+
+            if(existingWindow != null){
+
+
+                parent.remove(existingWindow);
+                parent.add(existingWindow, myDockspacePos);
+            }
+        }
+
+
+
+
+
+
+
         parent.remove(this);
-        parent.add(this, args);
-        layoutArgs = args;
+        parent.add(this, newDockspacePos);
+        myDockspacePos = newDockspacePos;
         parent.revalidate();
         parent.repaint();
     }
-
-
-
-    public int getMyDockDistance() {
-        return myDockDistance;
-    }
-
     public void setRequiredDockDistance(int myDockDistance) {
         this.myDockDistance = myDockDistance;
     }
 
-    public void setEnabledRecursively(Component component, boolean enabled) {
+    private void setEnabledRecursively(Component component, boolean enabled) {
         if(!(component instanceof JDockableWindow))
             component.setEnabled(enabled);
         if (component instanceof Container) {
@@ -144,6 +190,13 @@ public class JDockableWindow extends JPanel {
     }
 
 
+    public Dimension getVerticallyDockedPreferredSize() {
+        return vPreferredSize;
+    }
+
+    public Dimension getHorizontallyDockedPreferredSize() {
+        return hPreferredSize;
+    }
 
     @Override
     public void setEnabled(boolean enabled) {
@@ -151,6 +204,6 @@ public class JDockableWindow extends JPanel {
     }
 
     public void setLayoutInfo(Object args) {
-        this.layoutArgs = args;
+        this.myDockspacePos = args;
     }
 }

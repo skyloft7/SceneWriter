@@ -7,6 +7,8 @@
 
 package thirdparty;
 
+import custom.ResizeListener;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -50,6 +52,8 @@ public class ComponentResizer extends MouseAdapter
     private Rectangle bounds;
     private Point pressed;
     private boolean autoscrolls;
+
+    private HashMap<Component, ResizeListener> registry = new HashMap<>();
 
     private Dimension minimumSize = MINIMUM_SIZE;
     private Dimension maximumSize = MAXIMUM_SIZE;
@@ -102,7 +106,13 @@ public class ComponentResizer extends MouseAdapter
     {
         setDragInsets( dragInsets );
         setSnapSize( snapSize );
-        registerComponent( components );
+
+        for(Component component : components){
+            registerComponent(component);
+        }
+
+
+
     }
 
     /**
@@ -186,22 +196,19 @@ public class ComponentResizer extends MouseAdapter
         {
             component.removeMouseListener( this );
             component.removeMouseMotionListener( this );
+            registry.remove(component);
         }
     }
+
+
 
     /**
      *  Add the required listeners to the specified component
      *
      *  @param component  the component the listeners are added to
      */
-    public void registerComponent(Component... components)
-    {
-        for (Component component : components)
-        {
-            component.addMouseListener( this );
-            component.addMouseMotionListener( this );
-        }
-    }
+
+
 
     /**
      *	Get the snap size.
@@ -381,6 +388,8 @@ public class ComponentResizer extends MouseAdapter
 
         //  Resizing the West or North border affects the size and location
 
+        ResizeListener.ResizeAxis resizeAxis = null;
+
         if (WEST == (direction & WEST))
         {
             int drag = getDragDistance(pressed.x, current.x, snapSize.width);
@@ -389,6 +398,8 @@ public class ComponentResizer extends MouseAdapter
 
             x -= drag;
             width += drag;
+
+            resizeAxis = ResizeListener.ResizeAxis.HORIZONTAL;
         }
 
         if (NORTH == (direction & NORTH))
@@ -399,6 +410,8 @@ public class ComponentResizer extends MouseAdapter
 
             y -= drag;
             height += drag;
+
+            resizeAxis = ResizeListener.ResizeAxis.VERTICAL;
         }
 
         //  Resizing the East or South border only affects the size
@@ -410,6 +423,8 @@ public class ComponentResizer extends MouseAdapter
             int maximum = Math.min(boundingSize.width - x, maximumSize.width);
             drag = getDragBounded(drag, snapSize.width, width, minimumSize.width, maximum);
             width += drag;
+
+            resizeAxis = ResizeListener.ResizeAxis.HORIZONTAL;
         }
 
         if (SOUTH == (direction & SOUTH))
@@ -419,9 +434,17 @@ public class ComponentResizer extends MouseAdapter
             int maximum = Math.min(boundingSize.height - y, maximumSize.height);
             drag = getDragBounded(drag, snapSize.height, height, minimumSize.height, maximum);
             height += drag;
+
+            resizeAxis = ResizeListener.ResizeAxis.VERTICAL;
         }
 
         source.setPreferredSize(new Dimension(width, height));
+
+        ResizeListener resizeListener = registry.get(source);
+
+        if(resizeListener != null){
+            resizeListener.onResized(resizeAxis);
+        }
 
         source.repaint();
         source.revalidate();
@@ -472,5 +495,17 @@ public class ComponentResizer extends MouseAdapter
         {
             return source.getParent().getSize();
         }
+    }
+
+    public void registerComponent(Component component, ResizeListener resizeListener) {
+        component.addMouseListener( this );
+        component.addMouseMotionListener( this );
+        registry.put(component, resizeListener);
+    }
+
+    public void registerComponent(Component component) {
+        component.addMouseListener( this );
+        component.addMouseMotionListener( this );
+        registry.put(component, null);
     }
 }
