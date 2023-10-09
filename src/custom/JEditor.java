@@ -22,12 +22,14 @@ public class JEditor extends JTextPane {
     private ArrayList<Note> notes = new ArrayList<>();
     private DefaultHighlighter.DefaultHighlightPainter noteHighlighter;
     private HashMap<String, PopupContext> popups = new HashMap<>();
+    private SimpleAttributeSet currentAttributeSet = new SimpleAttributeSet();
+
 
 
     public JEditor() {
 
         //TODO: This can be moved to the class-level scope and then we don't have to do this whole array thing
-        final SimpleAttributeSet[] currentAttr = {new SimpleAttributeSet()};
+        //final SimpleAttributeSet[] currentAttr = {new SimpleAttributeSet()};
 
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
 
@@ -118,7 +120,7 @@ public class JEditor extends JTextPane {
                 public void insertUpdate(DocumentEvent e) {
                     SwingUtilities.invokeLater(() -> {
                         //For live typing with Italics/Bold/Underline/etc.
-                        getStyledDocument().setCharacterAttributes(e.getOffset(), 1, currentAttr[0], false);
+                        getStyledDocument().setCharacterAttributes(e.getOffset(), 1, currentAttributeSet, false);
                     });
                 }
 
@@ -141,10 +143,10 @@ public class JEditor extends JTextPane {
                     int selectedLength = getSelectionEnd() - getSelectionStart();
                     boolean selectingText = selectedLength > 0;
 
-                    AttributeSet attributeSet = currentAttr[0];
+                    AttributeSet attributeSet = currentAttributeSet;
 
                     if (selectingText) {
-                        currentAttr[0].removeAttributes(currentAttr[0]);
+                        currentAttributeSet.removeAttributes(currentAttributeSet);
                         attributeSet = getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes();
                     }
 
@@ -154,31 +156,31 @@ public class JEditor extends JTextPane {
                     if (e.isControlDown()) {
 
 
-                        preChangeAttr = currentAttr[0].copyAttributes();
+                        preChangeAttr = currentAttributeSet.copyAttributes();
 
 
                         if (e.getKeyCode() == VK_I) {
-                            StyleConstants.setItalic(currentAttr[0], !StyleConstants.isItalic(attributeSet));
+                            StyleConstants.setItalic(currentAttributeSet, !StyleConstants.isItalic(attributeSet));
                         }
                         if (e.getKeyCode() == VK_B) {
-                            StyleConstants.setBold(currentAttr[0], !StyleConstants.isBold(attributeSet));
+                            StyleConstants.setBold(currentAttributeSet, !StyleConstants.isBold(attributeSet));
                         }
                         if (e.getKeyCode() == VK_U) {
-                            StyleConstants.setUnderline(currentAttr[0], !StyleConstants.isUnderline(attributeSet));
+                            StyleConstants.setUnderline(currentAttributeSet, !StyleConstants.isUnderline(attributeSet));
                         }
                         if (e.getKeyCode() == VK_COMMA) {
-                            StyleConstants.setSubscript(currentAttr[0], !StyleConstants.isSubscript(attributeSet));
+                            StyleConstants.setSubscript(currentAttributeSet, !StyleConstants.isSubscript(attributeSet));
                         }
                         if (e.getKeyCode() == VK_PERIOD) {
-                            StyleConstants.setSuperscript(currentAttr[0], !StyleConstants.isSuperscript(attributeSet));
+                            StyleConstants.setSuperscript(currentAttributeSet, !StyleConstants.isSuperscript(attributeSet));
                         }
                         if (e.getKeyCode() == VK_UP) {
                             int oldSize = StyleConstants.getFontSize(attributeSet);
-                            StyleConstants.setFontSize(currentAttr[0], oldSize + 1);
+                            StyleConstants.setFontSize(currentAttributeSet, oldSize + 1);
                         }
                         if (e.getKeyCode() == VK_DOWN) {
                             int oldSize = StyleConstants.getFontSize(attributeSet);
-                            StyleConstants.setFontSize(currentAttr[0], oldSize - 1);
+                            StyleConstants.setFontSize(currentAttributeSet, oldSize - 1);
                         }
 
 
@@ -188,12 +190,12 @@ public class JEditor extends JTextPane {
                         getStyledDocument().setCharacterAttributes(
                                 getSelectionStart(),
                                 selectedLength,
-                                currentAttr[0],
+                                currentAttributeSet,
                                 false
                         );
 
                         if (preChangeAttr != null)
-                            currentAttr[0] = (SimpleAttributeSet) preChangeAttr;
+                            currentAttributeSet = (SimpleAttributeSet) preChangeAttr;
                     }
 
 
