@@ -157,6 +157,11 @@ public class JDockableWindow extends JPanel {
 
             if(existingWindow != null){
 
+                if(myDockspacePos == BorderLayout.NORTH || myDockspacePos == BorderLayout.SOUTH)
+                    existingWindow.setPreferredSize(existingWindow.getVerticallyDockedPreferredSize());
+                if(myDockspacePos == BorderLayout.WEST || myDockspacePos == BorderLayout.EAST)
+                    existingWindow.setPreferredSize(existingWindow.getHorizontallyDockedPreferredSize());
+
 
                 parent.remove(existingWindow);
                 parent.add(existingWindow, myDockspacePos);
