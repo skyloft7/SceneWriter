@@ -45,28 +45,49 @@ public class JEditor extends JTextPane {
                     if (SwingUtilities.isRightMouseButton(e)) {
                         JPopupMenu jPopupMenu = new JPopupMenu();
 
-                        if (getSelectedText() != null) {
+                        JMenu notesMenu = new JMenu("Notes");
+                        {
+                            if (getSelectedText() != null) {
 
-                            JMenuItem makeNote = new JMenuItem("Make Note");
-                            {
-                                makeNote.addActionListener(e12 -> {
-                                    Note note = new Note("Empty Note", getSelectionStart(), getSelectionEnd());
-                                    notes.add(note);
-                                    showNotePopup(e.getPoint(), note);
+                                JMenuItem makeNote = new JMenuItem("Make Note");
+                                {
+                                    makeNote.addActionListener(e12 -> {
+                                        Note note = new Note("Empty Note", getSelectionStart(), getSelectionEnd());
+                                        notes.add(note);
+                                        showNotePopup(e.getPoint(), note);
 
-                                    try {
-                                        getHighlighter().addHighlight(note.startOffset, note.endOffset, noteHighlighter);
-                                    } catch (BadLocationException ex) {
-                                        throw new RuntimeException(ex);
-                                    }
+                                        try {
+                                            getHighlighter().addHighlight(note.startOffset, note.endOffset, noteHighlighter);
+                                        } catch (BadLocationException ex) {
+                                            throw new RuntimeException(ex);
+                                        }
 
-                                });
+                                    });
 
+                                }
+                                notesMenu.add(makeNote);
                             }
 
 
-                            jPopupMenu.add(makeNote);
+                            notesMenu.addSeparator();
+
+                            for (Note note : notes) {
+                                JMenuItem m = new JMenuItem(note.text);
+                                m.addActionListener(e1 -> {
+                                    try {
+                                        scrollRectToVisible(modelToView2D(note.startOffset).getBounds());
+                                    } catch (BadLocationException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                });
+                                notesMenu.add(m);
+                            }
+
+
                         }
+
+
+                        jPopupMenu.add(notesMenu);
 
                         if (jPopupMenu.getComponents().length == 0)
                             jPopupMenu.add(new JLabel("Nothing to do!"));
@@ -220,6 +241,8 @@ public class JEditor extends JTextPane {
         JButton remove = new JButton(new FlatTabbedPaneCloseIcon());
         remove.setContentAreaFilled(false);
         remove.setToolTipText("Delete Note");
+
+        noteText.setColumns(20);
 
 
         JPanel panel = new JPanel();
