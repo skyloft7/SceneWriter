@@ -19,6 +19,7 @@ public class JDockableWindow extends JPanel {
     //Test replacement docking with axis-specific sizes
 
     public JDockableWindow(String title){
+        //NOTE(Shayan): this might compete with getPreferredSize() that a user has already set
         vPreferredSize = new Dimension(getPreferredSize().width, getPreferredSize().height + amnestySize);
         hPreferredSize = new Dimension(getPreferredSize().width + amnestySize, getPreferredSize().height);
 
@@ -83,23 +84,19 @@ public class JDockableWindow extends JPanel {
                     //East
                     if(p.getX() > parent.getBounds().width - myDockDistance){
                         setPreferredSize(hPreferredSize);
-                        setPosition(parent, BorderLayout.EAST);
                     }
                     //West
                     if(p.getX() < myDockDistance){
                         setPreferredSize(hPreferredSize);
-                        setPosition(parent, BorderLayout.WEST);
                     }
 
                     //North
                     if(p.getY() < myDockDistance){
                         setPreferredSize(vPreferredSize);
-                        setPosition(parent, BorderLayout.NORTH);
                     }
                     //South
                     if(p.getY() > parent.getBounds().height - myDockDistance){
                         setPreferredSize(vPreferredSize);
-                        setPosition(parent, BorderLayout.SOUTH);
                     }
 
 
@@ -165,8 +162,15 @@ public class JDockableWindow extends JPanel {
 
                 parent.remove(existingWindow);
                 parent.add(existingWindow, myDockspacePos);
+                existingWindow.myDockspacePos = myDockspacePos;
+
             }
         }
+
+        if(newDockspacePos == BorderLayout.NORTH || newDockspacePos == BorderLayout.SOUTH)
+            setPreferredSize(getVerticallyDockedPreferredSize());
+        if(newDockspacePos == BorderLayout.WEST || newDockspacePos == BorderLayout.EAST)
+            setPreferredSize(getHorizontallyDockedPreferredSize());
 
 
 
