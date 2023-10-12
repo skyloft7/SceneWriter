@@ -7,22 +7,25 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.image.BufferedImage;
 
 public class JEditorScrollPane extends JScrollPane {
 
     private PopupFactory popupFactory = new PopupFactory();
     private Popup popup = null;
-    private BufferedImage previewImage;
     private JLabel previewComponent = new JLabel();
+
+    private PreviewImage previewImage;
     private JEditor editor;
 
     public JEditorScrollPane(JEditor jEditor, int vsbPolicy, int hsbPolicy) {
         super(jEditor, vsbPolicy, hsbPolicy);
         this.editor = jEditor;
+        this.previewImage = new PreviewImage(jEditor);
 
-
+        previewComponent.setIcon(this.previewImage);
         previewComponent.setBorder(new FlatRoundBorder());
+
+
 
 
 
@@ -35,7 +38,8 @@ public class JEditorScrollPane extends JScrollPane {
                 Point p = new Point(0, 0);
                 SwingUtilities.convertPointToScreen(p, JEditorScrollPane.this);
 
-                render(jEditor, e.getY());
+                previewImage.setPosition(e.getY());
+                previewComponent.repaint();
                 popup = popupFactory.getPopup(JEditorScrollPane.this, previewComponent, p.x, p.y);
                 popup.show();
 
@@ -53,8 +57,8 @@ public class JEditorScrollPane extends JScrollPane {
         getVerticalScrollBar().addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int offset = e.getY();
-                render(jEditor, offset);
+                previewImage.setPosition(e.getY());
+                previewComponent.repaint();
             }
         });
 
@@ -62,24 +66,43 @@ public class JEditorScrollPane extends JScrollPane {
 
     }
 
-    public void render(JEditor jEditor, int offset){
-        Rectangle view = new Rectangle(0, 0, jEditor.getWidth(), 100);
 
+    private class PreviewImage implements Icon {
 
-        //FIXME: This is really expensive on memory
-        previewImage = new BufferedImage(view.width, view.height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = previewImage.createGraphics();
+        private int pos;
 
-        float scaleF = (float) editor.getHeight() / getVerticalScrollBar().getHeight();
-        g.translate(0, -offset * scaleF);
+        private Component component;
 
-        jEditor.paint(g);
-        g.dispose();
+        public PreviewImage(Component component) {
+            this.component = component;
+        }
 
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D graphics2D = (Graphics2D) g;
+            float scaleF = (float) editor.getHeight() / getVerticalScrollBar().getHeight();
+            graphics2D.translate(0, (int) (-pos * scaleF));
+            component.paint(graphics2D);
+        }
 
-        previewComponent.setIcon(new ImageIcon(previewImage));
-        previewComponent.repaint();
+        @Override
+        public int getIconWidth() {
+            return component.getWidth();
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 100;
+        }
+
+        public void setPosition(int y) {
+            this.pos = y;
+        }
+
+        public int getPosition() {
+            return pos;
+        }
     }
 
-    
+
 }
