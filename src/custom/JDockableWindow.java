@@ -1,8 +1,10 @@
 package custom;
 
+import flatlaf.FlatLafUtils;
 import thirdparty.ComponentResizer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -16,9 +18,10 @@ public class JDockableWindow extends JPanel {
     private Dimension vPreferredSize, hPreferredSize;
     private int amnestySize = 50;
 
-    //Test replacement docking with axis-specific sizes
+    private String title;
 
     public JDockableWindow(String title){
+        this.title = title;
         //NOTE(Shayan): this might compete with getPreferredSize() that a user has already set
         vPreferredSize = new Dimension(getPreferredSize().width, getPreferredSize().height + amnestySize);
         hPreferredSize = new Dimension(getPreferredSize().width + amnestySize, getPreferredSize().height);
@@ -42,7 +45,48 @@ public class JDockableWindow extends JPanel {
 
         setLayout(new BorderLayout());
 
-        setBorder(BorderFactory.createTitledBorder(title));
+        JPanel header = new JPanel();
+
+        System.out.println(FlatLafUtils.accentColor);
+
+
+        header.setBorder(new Border() {
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                Graphics2D graphics2D = (Graphics2D) g;
+
+                graphics2D.setStroke(new BasicStroke(3));
+                graphics2D.setColor(FlatLafUtils.accentColor);
+                graphics2D.drawLine(x, 0, x + width, 0);
+
+            }
+
+            @Override
+            public Insets getBorderInsets(Component c) {
+                return new Insets(0, 0, 0, 0);
+            }
+
+            @Override
+            public boolean isBorderOpaque() {
+                return true;
+            }
+        });
+
+        //header.setBackground(new Color(38, 117, 191));
+
+
+
+        header.setLayout(new BorderLayout());
+        JLabel titleText = new JLabel(title);
+        titleText.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        header.add(titleText, BorderLayout.WEST);
+
+        add(header, BorderLayout.NORTH);
+        setBorder(BorderFactory.createEtchedBorder());
+
+
+
+
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -84,19 +128,23 @@ public class JDockableWindow extends JPanel {
                     //East
                     if(p.getX() > parent.getBounds().width - myDockDistance){
                         setPreferredSize(hPreferredSize);
+                        setPosition(parent, BorderLayout.EAST);
                     }
                     //West
                     if(p.getX() < myDockDistance){
                         setPreferredSize(hPreferredSize);
+                        setPosition(parent, BorderLayout.WEST);
                     }
 
                     //North
                     if(p.getY() < myDockDistance){
                         setPreferredSize(vPreferredSize);
+                        setPosition(parent, BorderLayout.NORTH);
                     }
                     //South
                     if(p.getY() > parent.getBounds().height - myDockDistance){
                         setPreferredSize(vPreferredSize);
+                        setPosition(parent, BorderLayout.SOUTH);
                     }
 
 
@@ -212,7 +260,15 @@ public class JDockableWindow extends JPanel {
         setEnabledRecursively(this, enabled);
     }
 
-    public void setLayoutInfo(Object args) {
+    public void setDockPos(Object args) {
         this.myDockspacePos = args;
+    }
+
+    public Object getDockPos() {
+        return myDockspacePos;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

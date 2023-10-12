@@ -1,4 +1,5 @@
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import custom.JDockableWindow;
 import custom.JDockspace;
@@ -6,9 +7,14 @@ import custom.JEditor;
 import custom.JEditorScrollPane;
 import custom.diagram.JDiagramEditor;
 import flatlaf.FlatLafUtils;
+import org.simpleyaml.configuration.ConfigurationSection;
+import org.simpleyaml.configuration.file.YamlFile;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
@@ -27,12 +33,15 @@ public class Main {
 
             JFrame jFrame = new JFrame("Scene");
 
+
+
             JMenuBar jMenuBar = new JMenuBar();
             {
                 JMenu settings = new JMenu("Settings");
                 {
                     JCheckBoxMenuItem darkMode = new JCheckBoxMenuItem("Dark Mode");
                     {
+                        darkMode.setSelected(FlatLaf.isLafDark());
                         darkMode.addActionListener(e -> {
 
                             if (darkMode.isSelected()) FlatDarkLaf.setup();
@@ -60,10 +69,6 @@ public class Main {
             jFrame.setJMenuBar(jMenuBar);
 
 
-
-
-
-
             JDockspace jDockspace = new JDockspace();
             {
 
@@ -81,6 +86,115 @@ public class Main {
 
             }
             jFrame.add(jDockspace);
+
+            //Load UI prefs
+            {
+                YamlFile preferencesFile = new YamlFile("Settings.yaml");
+                try {
+                    preferencesFile.load();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                if(preferencesFile.exists()){
+
+
+                    boolean darkMode = preferencesFile.getBoolean("DarkMode");
+                    {
+
+                        if (darkMode) {
+                            System.out.println("Dark mode is best mode");
+                            FlatDarkLaf.setup();
+                        } else {
+                            FlatLightLaf.setup();
+                        }
+
+                        SwingUtilities.updateComponentTreeUI(jFrame);
+                        jFrame.repaint();
+                    }
+
+                    ConfigurationSection dockspace = preferencesFile.getConfigurationSection("Dockspace");
+                    for(JDockableWindow jDockableWindow : jDockspace.getWindows().values()){
+                        ConfigurationSection c = dockspace.getConfigurationSection(jDockableWindow.getTitle());
+
+                        jDockableWindow.setPreferredSize(new Dimension(c.getInt("width"), c.getInt("height")));
+
+                        Object dockPos = c.get("dockPosition");
+
+                        jDockspace.remove(jDockableWindow);
+                        jDockspace.add(jDockableWindow, dockPos);
+                        jDockspace.revalidate();
+                        jDockspace.repaint();
+
+                        jDockableWindow.setDockPos(dockPos);
+
+
+
+
+                    }
+
+
+
+
+                }
+            }
+
+
+
+
+
+
+            jFrame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    //TODO: Move this to EDT
+
+
+                    try {
+                        YamlFile preferencesFile = new YamlFile("Settings.yaml");
+                        preferencesFile.createNewFile(true);
+
+
+
+                        preferencesFile.set("DarkMode", FlatLaf.isLafDark());
+                        ConfigurationSection dockspacePrefs = preferencesFile.createSection("Dockspace");
+
+                        for(JDockableWindow jDockableWindow : jDockspace.getWindows().values()){
+                            ConfigurationSection windowPrefs = dockspacePrefs.createSection(jDockableWindow.getTitle());
+                            windowPrefs.set("dockPosition", jDockableWindow.getDockPos());
+                            windowPrefs.set("width", jDockableWindow.getSize().width);
+                            windowPrefs.set("height", jDockableWindow.getSize().height);
+
+
+
+                        }
+
+
+
+
+
+
+
+
+                        preferencesFile.save();
+                    }
+                    catch (IOException ex){
+                        ex.printStackTrace();
+                    }
+
+
+
+
+
+
+                }
+            });
+
+
+
+
+
+
 
             jFrame.setSize(980, 580);
             jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

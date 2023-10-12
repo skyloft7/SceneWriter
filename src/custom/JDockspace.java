@@ -4,20 +4,24 @@ import flatlaf.FlatLafUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JDockspace extends JPanel {
     private boolean showOverlay;
     private int dockDistance = 50;
 
+    private Map<String, JDockableWindow> windows = new HashMap();
 
     public JDockspace() {
         setLayout(new BorderLayout());
     }
 
     public void addWindow(JDockableWindow jDockableWindow, Object args) {
-        jDockableWindow.setLayoutInfo(args);
+        jDockableWindow.setDockPos(args);
         add(jDockableWindow, args);
         jDockableWindow.setRequiredDockDistance(dockDistance);
+        windows.put(jDockableWindow.getTitle(), jDockableWindow);
     }
 
 
@@ -26,7 +30,12 @@ public class JDockspace extends JPanel {
         repaint();
     }
 
-    private AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f);
+    public void hideOverlay() {
+        showOverlay = false;
+        repaint();
+    }
+
+    private AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.50f);
 
     @Override
     public void paint(Graphics graphics) {
@@ -54,8 +63,7 @@ public class JDockspace extends JPanel {
         graphics2D.dispose();
     }
 
-    public void hideOverlay() {
-        showOverlay = false;
-        repaint();
+    public Map<String, JDockableWindow> getWindows() {
+        return windows;
     }
 }
