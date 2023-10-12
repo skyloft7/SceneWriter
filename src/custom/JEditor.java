@@ -22,14 +22,13 @@ public class JEditor extends JTextPane {
     private ArrayList<Note> notes = new ArrayList<>();
     private DefaultHighlighter.DefaultHighlightPainter noteHighlighter;
     private HashMap<String, PopupContext> popups = new HashMap<>();
-    private SimpleAttributeSet currentAttributeSet = new SimpleAttributeSet();
+    private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
 
 
 
     public JEditor() {
-
-        //TODO: This can be moved to the class-level scope and then we don't have to do this whole array thing
-        //final SimpleAttributeSet[] currentAttr = {new SimpleAttributeSet()};
+        super();
+        setStyledDocument(new EditorDocument());
 
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
 
@@ -139,10 +138,16 @@ public class JEditor extends JTextPane {
             getStyledDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
+
                     SwingUtilities.invokeLater(() -> {
-                        //For live typing with Italics/Bold/Underline/etc.
-                        getStyledDocument().setCharacterAttributes(e.getOffset(), 1, currentAttributeSet, false);
+                        if(e.getLength() > 1){
+                            for (int i = e.getOffset(); i < e.getOffset() + e.getLength(); i++) {
+                                getStyledDocument().setCharacterAttributes(i, 1, cursorAttributes, false);
+                            }
+                        }
+                        else getStyledDocument().setCharacterAttributes(e.getOffset(), 1, cursorAttributes, false);
                     });
+
                 }
 
                 @Override
@@ -161,63 +166,78 @@ public class JEditor extends JTextPane {
             addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    int selectedLength = getSelectionEnd() - getSelectionStart();
-                    boolean selectingText = selectedLength > 0;
 
-                    AttributeSet attributeSet = currentAttributeSet;
+                    boolean selectingText = getSelectedText() != null;
 
-                    if (selectingText) {
-                        currentAttributeSet.removeAttributes(currentAttributeSet);
-                        attributeSet = getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes();
+                    MutableAttributeSet currentAttributes = cursorAttributes;
+
+
+                    if(selectingText) {
+                        ((EditorDocument) getStyledDocument()).lockWriter();
+
+
+                        /*
+                        The first time this runs, it returns the paragraph style because there's only 1 AttributeSet (for a whole paragraph) at that getSelectionStart().
+                        Then when the change is applied, the AttributeSet structure is changed and every character now has it's own, which means that next time this runs,
+                        it only changes those specific letters.
+                         */
+                        currentAttributes = (MutableAttributeSet) getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes();
+
                     }
 
 
-                    AttributeSet preChangeAttr = null;
 
                     if (e.isControlDown()) {
 
+                        boolean actionDone = false;
 
-                        preChangeAttr = currentAttributeSet.copyAttributes();
+                        //Actions
+                        {
 
+                            if (e.getKeyCode() == VK_I) {
+                                StyleConstants.setItalic(currentAttributes, !StyleConstants.isItalic(currentAttributes));
+                                actionDone = true;
+                            }
+                            if (e.getKeyCode() == VK_B) {
+                                StyleConstants.setBold(currentAttributes, !StyleConstants.isBold(currentAttributes));
+                                actionDone = true;
+                            }
+                            if (e.getKeyCode() == VK_U) {
+                                StyleConstants.setUnderline(currentAttributes, !StyleConstants.isUnderline(currentAttributes));
+                                actionDone = true;
+                            }
+                            if (e.getKeyCode() == VK_COMMA) {
+                                StyleConstants.setSubscript(currentAttributes, !StyleConstants.isSubscript(currentAttributes));
+                                actionDone = true;
+                            }
+                            if (e.getKeyCode() == VK_PERIOD) {
+                                StyleConstants.setSuperscript(currentAttributes, !StyleConstants.isSuperscript(currentAttributes));
+                                actionDone = true;
+                            }
+                            if (e.getKeyCode() == VK_UP) {
+                                int oldSize = StyleConstants.getFontSize(currentAttributes);
+                                StyleConstants.setFontSize(currentAttributes, oldSize + 1);
+                                actionDone = true;
+                            }
+                            if (e.getKeyCode() == VK_DOWN) {
+                                int oldSize = StyleConstants.getFontSize(currentAttributes);
+                                StyleConstants.setFontSize(currentAttributes, oldSize - 1);
+                                actionDone = true;
+                            }
+                        }
 
-                        if (e.getKeyCode() == VK_I) {
-                            StyleConstants.setItalic(currentAttributeSet, !StyleConstants.isItalic(attributeSet));
-                        }
-                        if (e.getKeyCode() == VK_B) {
-                            StyleConstants.setBold(currentAttributeSet, !StyleConstants.isBold(attributeSet));
-                        }
-                        if (e.getKeyCode() == VK_U) {
-                            StyleConstants.setUnderline(currentAttributeSet, !StyleConstants.isUnderline(attributeSet));
-                        }
-                        if (e.getKeyCode() == VK_COMMA) {
-                            StyleConstants.setSubscript(currentAttributeSet, !StyleConstants.isSubscript(attributeSet));
-                        }
-                        if (e.getKeyCode() == VK_PERIOD) {
-                            StyleConstants.setSuperscript(currentAttributeSet, !StyleConstants.isSuperscript(attributeSet));
-                        }
-                        if (e.getKeyCode() == VK_UP) {
-                            int oldSize = StyleConstants.getFontSize(attributeSet);
-                            StyleConstants.setFontSize(currentAttributeSet, oldSize + 1);
-                        }
-                        if (e.getKeyCode() == VK_DOWN) {
-                            int oldSize = StyleConstants.getFontSize(attributeSet);
-                            StyleConstants.setFontSize(currentAttributeSet, oldSize - 1);
+                        if(actionDone){
+                            if(selectingText){
+                                int selectionLength = getSelectionEnd() - getSelectionStart();
+                                getStyledDocument().setCharacterAttributes(getSelectionStart(), selectionLength, currentAttributes, false);
+                                ((EditorDocument) getStyledDocument()).unlockWriter();
+
+                            }
                         }
 
 
                     }
 
-                    if (selectingText) {
-                        getStyledDocument().setCharacterAttributes(
-                                getSelectionStart(),
-                                selectedLength,
-                                currentAttributeSet,
-                                false
-                        );
-
-                        if (preChangeAttr != null)
-                            currentAttributeSet = (SimpleAttributeSet) preChangeAttr;
-                    }
 
 
                     if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_Z) {
