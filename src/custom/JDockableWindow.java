@@ -50,20 +50,26 @@ public class JDockableWindow extends JPanel {
         System.out.println(FlatLafUtils.accentColor);
 
 
-        header.setBorder(new Border() {
+
+
+
+
+        header.setLayout(new BorderLayout());
+        JLabel titleText = new JLabel(title);
+        titleText.setBorder(new Border() {
             @Override
             public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
                 Graphics2D graphics2D = (Graphics2D) g;
 
-                graphics2D.setStroke(new BasicStroke(3));
+                graphics2D.setStroke(new BasicStroke(5));
                 graphics2D.setColor(FlatLafUtils.accentColor);
-                graphics2D.drawLine(x, 0, x + width, 0);
+                graphics2D.drawLine(x, height, x + width, height);
 
             }
 
             @Override
             public Insets getBorderInsets(Component c) {
-                return new Insets(0, 0, 0, 0);
+                return new Insets(5, 5, 5, 5);
             }
 
             @Override
@@ -72,17 +78,23 @@ public class JDockableWindow extends JPanel {
             }
         });
 
-        //header.setBackground(new Color(38, 117, 191));
-
-
-
-        header.setLayout(new BorderLayout());
-        JLabel titleText = new JLabel(title);
-        titleText.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
         header.add(titleText, BorderLayout.WEST);
 
+
+
+
+
+
+
+
+
         add(header, BorderLayout.NORTH);
-        setBorder(BorderFactory.createEtchedBorder());
+        setBorder(BorderFactory.createTitledBorder(""));
+
+
+
+
+
 
 
 
@@ -116,7 +128,6 @@ public class JDockableWindow extends JPanel {
                 }
 
                 Container parent = getParent();
-
                 Point p = SwingUtilities.convertPoint(JDockableWindow.this, e.getPoint(), parent);
 
 
