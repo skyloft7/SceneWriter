@@ -31,6 +31,7 @@ public class JEditor extends JTextPane {
         setStyledDocument(new EditorDocument());
 
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
+        StyleConstants.setFontFamily(cursorAttributes, getFont().getFamily());
 
 
         //Context Menu
@@ -43,6 +44,29 @@ public class JEditor extends JTextPane {
                     //Menu
                     if (SwingUtilities.isRightMouseButton(e)) {
                         JPopupMenu jPopupMenu = new JPopupMenu();
+
+                        JFontBoxMenuItem jFontBoxMenuItem = new JFontBoxMenuItem(15, Font.PLAIN, GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts());
+                        {
+                            jFontBoxMenuItem.setSelectedFont(isSelectingText() ? StyleConstants.getFontFamily(getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes()) : StyleConstants.getFontFamily(cursorAttributes));
+                            jFontBoxMenuItem.addFontListener(f -> {
+                                if(isSelectingText()){
+                                    SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+                                    StyleConstants.setFontFamily(simpleAttributeSet, f.getFamily());
+                                    getStyledDocument().setCharacterAttributes(getSelectionStart(), getSelectionEnd() - getSelectionStart(), simpleAttributeSet, false);
+
+                                }
+                                else {
+                                    StyleConstants.setFontFamily(cursorAttributes, f.getFamily());
+                                }
+                            });
+                        }
+
+
+                        jPopupMenu.add(jFontBoxMenuItem);
+
+
+
+
 
                         JMenu notesMenu = new JMenu("Notes");
                         {
@@ -296,6 +320,9 @@ public class JEditor extends JTextPane {
         popup.show();
     }
 
+    private boolean isSelectingText(){
+        return getSelectionEnd() - getSelectionStart() > 0;
+    }
 
     public ArrayList<Note> getNotes() {
         return notes;
