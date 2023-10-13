@@ -79,10 +79,12 @@ public class JEditorScrollPane extends JScrollPane {
 
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
-            Graphics2D graphics2D = (Graphics2D) g;
-            float scaleF = (float) editor.getHeight() / getVerticalScrollBar().getHeight();
+
+            Graphics2D graphics2D = (Graphics2D) g.create();
+            double scaleF = (double) editor.getHeight() / getVerticalScrollBar().getHeight();
             graphics2D.translate(0, (int) (-pos * scaleF));
             component.paint(graphics2D);
+            g.dispose();
         }
 
         @Override
@@ -92,7 +94,7 @@ public class JEditorScrollPane extends JScrollPane {
 
         @Override
         public int getIconHeight() {
-            return 100;
+            return 200;
         }
 
         public void setPosition(int y) {
