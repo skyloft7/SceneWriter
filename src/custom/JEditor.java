@@ -27,6 +27,7 @@ public class JEditor extends JTextPane {
 
 
     public JEditor() {
+
         super();
         setStyledDocument(new EditorDocument());
 
@@ -287,7 +288,75 @@ public class JEditor extends JTextPane {
             });
         }
 
+        //List Auto-Indent
+        {
+            getStyledDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        Document document = getDocument();
+
+                        if(document.getLength() != 0){
+
+                            try {
+
+
+                                //Only on blank lines
+
+                                Element paragraph = getStyledDocument().getParagraphElement(e.getOffset());
+                                boolean isIndentReady = isListIndentLine(document.getText(paragraph.getStartOffset(), paragraph.getEndOffset() - paragraph.getStartOffset()));
+
+                                System.out.println(isIndentReady);
+
+
+                                if(isIndentReady) {
+
+                                    if (document.getText(e.getOffset(), 1).equals("-")) {
+                                        document.insertString(e.getOffset(), "    ", new SimpleAttributeSet());
+                                    }
+                                }
+
+
+
+
+
+                            } catch (BadLocationException ex) {
+                                throw new RuntimeException(ex);
+                            }
+
+
+
+
+                        }
+
+
+
+
+
+
+                    });
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+
+                }
+            });
+        }
+
+
         getStyledDocument().addUndoableEditListener(manager);
+    }
+
+    private boolean isListIndentLine(String text){
+
+        return text.replaceAll("-", "").isBlank();
+
     }
 
     public void showNotePopup(Point point, Note note){
