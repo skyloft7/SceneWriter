@@ -1,6 +1,6 @@
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 import custom.JDockableWindow;
 import custom.JDockspace;
 import custom.JEditor;
@@ -45,7 +45,7 @@ public class Main {
                         darkMode.setSelected(FlatLaf.isLafDark());
                         darkMode.addActionListener(e -> {
 
-                            if (darkMode.isSelected()) FlatDarkLaf.setup();
+                            if (darkMode.isSelected()) FlatArcDarkIJTheme.setup();
                             else FlatLightLaf.setup();
 
                             SwingUtilities.updateComponentTreeUI(jFrame);

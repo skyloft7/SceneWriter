@@ -1,6 +1,6 @@
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 import custom.JDockableWindow;
 import custom.JDockspace;
 import org.simpleyaml.configuration.ConfigurationSection;
@@ -63,7 +63,7 @@ public class UILayoutSerializer {
 
                 if (darkMode) {
                     System.out.println("Dark mode is best mode");
-                    FlatDarkLaf.setup();
+                    FlatArcDarkIJTheme.setup();
                 } else {
                     FlatLightLaf.setup();
                 }
