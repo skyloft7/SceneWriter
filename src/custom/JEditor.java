@@ -45,25 +45,36 @@ public class JEditor extends JTextPane {
                     if (SwingUtilities.isRightMouseButton(e)) {
                         JPopupMenu jPopupMenu = new JPopupMenu();
 
-                        JFontBoxMenuItem jFontBoxMenuItem = new JFontBoxMenuItem(15, Font.PLAIN, GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts());
+                        JFontBoxMenuItem jFontBoxMenuItem = new JFontBoxMenuItem(13, Font.PLAIN, GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts());
                         {
-                            jFontBoxMenuItem.setSelectedFont(isSelectingText() ? StyleConstants.getFontFamily(getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes()) : StyleConstants.getFontFamily(cursorAttributes));
+                            jFontBoxMenuItem.setSelectedFont(StyleConstants.getFontFamily(getCurrentAttributes()));
                             jFontBoxMenuItem.addFontListener(f -> {
-                                if(isSelectingText()){
-                                    SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
-                                    StyleConstants.setFontFamily(simpleAttributeSet, f.getFamily());
-                                    getStyledDocument().setCharacterAttributes(getSelectionStart(), getSelectionEnd() - getSelectionStart(), simpleAttributeSet, false);
 
-                                }
-                                else {
-                                    StyleConstants.setFontFamily(cursorAttributes, f.getFamily());
-                                }
+                                SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+                                StyleConstants.setFontFamily(simpleAttributeSet, f.getFamily());
+                                updateCurrentAttribWith(simpleAttributeSet);
+
+
                             });
                         }
-
-
                         jPopupMenu.add(jFontBoxMenuItem);
 
+                        JSpinner fontSize = new JSpinner(new SpinnerNumberModel(
+                                StyleConstants.getFontSize(getCurrentAttributes()),
+                                0,
+                                100,
+                                1
+                        ));
+                        {
+                            fontSize.addChangeListener(e13 -> {
+                                SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+                                StyleConstants.setFontSize(simpleAttributeSet, (Integer) fontSize.getValue());
+                                updateCurrentAttribWith(simpleAttributeSet);
+                            });
+                        }
+                        jPopupMenu.add(fontSize);
+
+                        jPopupMenu.addSeparator();
 
 
 
@@ -323,6 +334,20 @@ public class JEditor extends JTextPane {
     private boolean isSelectingText(){
         return getSelectionEnd() - getSelectionStart() > 0;
     }
+
+    private AttributeSet getCurrentAttributes(){
+        return isSelectingText() ? getStyledDocument().getCharacterElement(getSelectionStart()).getAttributes() : cursorAttributes;
+    }
+
+    private void updateCurrentAttribWith(AttributeSet a){
+        if(isSelectingText()){
+            getStyledDocument().setCharacterAttributes(getSelectionStart(), getSelectionEnd() - getSelectionStart(), a, false);
+        }
+        else {
+            cursorAttributes.addAttributes(a);
+        }
+    }
+
 
     public ArrayList<Note> getNotes() {
         return notes;
