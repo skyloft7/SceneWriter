@@ -108,6 +108,12 @@ public class JEditor extends JTextPane {
 
                             for (Note note : notes) {
                                 JMenuItem m = new JMenuItem(note.text);
+                                try {
+                                    m.setToolTipText("<html><p style='font-style:italic;color:gray;'>" + getText(note.startOffset, note.endOffset - note.startOffset) + "</p></html>");
+                                } catch (BadLocationException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+
                                 m.addActionListener(e1 -> {
                                     try {
                                         scrollRectToVisible(modelToView2D(note.startOffset).getBounds());
