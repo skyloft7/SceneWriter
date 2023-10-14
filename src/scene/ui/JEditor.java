@@ -307,7 +307,6 @@ public class JEditor extends JTextPane {
                                 Element paragraph = getStyledDocument().getParagraphElement(e.getOffset());
                                 boolean isIndentReady = analyzer.shouldIndentLine(document.getText(paragraph.getStartOffset(), paragraph.getEndOffset() - paragraph.getStartOffset()));
 
-                                System.out.println(isIndentReady);
 
 
                                 if(isIndentReady) {

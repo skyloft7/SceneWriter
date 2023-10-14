@@ -47,7 +47,6 @@ public class JDockableWindow extends JPanel {
 
         JPanel header = new JPanel();
 
-        System.out.println(FlatLafUtils.accentColor);
 
 
 

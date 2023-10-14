@@ -79,7 +79,6 @@ public class UILayoutSerializer {
             for(JDockableWindow jDockableWindow : jDockspace.getWindows().values()){
                 ConfigurationSection c = dockspace.getConfigurationSection(jDockableWindow.getTitle());
 
-                System.out.println(c.getName());
 
                 Object dockPos = c.get("DockPosition");
                 jDockableWindow.setPreferredSize(new Dimension(c.getInt("Width"), c.getInt("Height")));

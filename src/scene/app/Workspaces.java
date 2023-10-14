@@ -12,7 +12,6 @@ public class Workspaces {
 
     public static Workspace get(String title){
         for(Workspace w : workspaces){
-            System.out.println("!" + w.getTitle() + " " + title);
             if(w.getTitle().equals(title)){
                 return w;
             }
