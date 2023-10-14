@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="commonmark-0.21.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/vendor/commonmark-0.21.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
