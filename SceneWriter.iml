@@ -8,5 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="flatlaf-3.2.1" level="project" />
+    <orderEntry type="library" name="flatlaf-intellij-themes-3.2.1" level="project" />
+    <orderEntry type="library" name="Simple-Yaml-1.8.4" level="project" />
   </component>
 </module>

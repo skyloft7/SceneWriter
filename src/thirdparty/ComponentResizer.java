@@ -7,7 +7,7 @@
 
 package thirdparty;
 
-import custom.ResizeListener;
+import scene.ui.ResizeListener;
 
 import javax.swing.*;
 import java.awt.*;
