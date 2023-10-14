@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 import flatlaf.FlatLafUtils;
+import scene.markdown.MarkdownFileFilter;
 import scene.ui.FileChoosers;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
@@ -52,12 +53,13 @@ public class Main {
 
                 JMenu open = new JMenu("Open");
                 {
+
                     open.addMenuListener(new MenuAdapter(){
                         @Override
                         public void menuSelected(MenuEvent e) {
                             Workspaces.get("Source")
                                     .getSignal(EditorPanel.OpenFileSignal.class)
-                                    .open(FileChoosers.showOpenDialog());
+                                    .open(FileChoosers.showOpenDialog(MarkdownFileFilter.filter));
 
                         }
                     });

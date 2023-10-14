@@ -1,6 +1,7 @@
 package scene.ui;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 
@@ -10,7 +11,13 @@ public class FileChoosers {
     private static File currentPath = FileSystemView.getFileSystemView().getHomeDirectory();
 
     public static File showOpenDialog(){
+        return showOpenDialog(null);
+    }
+
+    public static File showOpenDialog(FileFilter fileFilter){
         JFileChooser jFileChooser = new JFileChooser(currentPath);
+
+        if(fileFilter != null) jFileChooser.setFileFilter(fileFilter);
 
         if(jFileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             currentPath = jFileChooser.getSelectedFile().getParentFile();
