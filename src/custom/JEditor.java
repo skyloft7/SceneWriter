@@ -23,6 +23,7 @@ public class JEditor extends JTextPane {
     private DefaultHighlighter.DefaultHighlightPainter noteHighlighter;
     private HashMap<String, PopupContext> popups = new HashMap<>();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
+    private Analyzer analyzer = new Analyzer();
 
 
 
@@ -310,7 +311,7 @@ public class JEditor extends JTextPane {
                                 //Only on blank lines
 
                                 Element paragraph = getStyledDocument().getParagraphElement(e.getOffset());
-                                boolean isIndentReady = isListIndentLine(document.getText(paragraph.getStartOffset(), paragraph.getEndOffset() - paragraph.getStartOffset()));
+                                boolean isIndentReady = analyzer.shouldIndentLine(document.getText(paragraph.getStartOffset(), paragraph.getEndOffset() - paragraph.getStartOffset()));
 
                                 System.out.println(isIndentReady);
 
@@ -356,14 +357,12 @@ public class JEditor extends JTextPane {
         }
 
 
+
+
         getStyledDocument().addUndoableEditListener(manager);
     }
 
-    private boolean isListIndentLine(String text){
 
-        return text.replaceAll("-", "").isBlank();
-
-    }
 
     public void showNotePopup(Point point, Note note){
         SwingUtilities.convertPointToScreen(point, JEditor.this);
@@ -426,5 +425,11 @@ public class JEditor extends JTextPane {
 
     public ArrayList<Note> getNotes() {
         return notes;
+    }
+
+    private class Analyzer {
+        public boolean shouldIndentLine(String text){
+            return text.replaceAll("-", "").isBlank();
+        }
     }
 }
