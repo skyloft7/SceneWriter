@@ -31,17 +31,21 @@ public class Main {
 
             UILayoutSerializer uiLayoutSerializer = new UILayoutSerializer();
 
+
+
+
+            FlatLightLaf.setup();
+            FlatLafUtils.setup();
+
             UIManager.put("RootPane.background", Color.BLACK);
             UIManager.put("MenuBar.foreground", Color.WHITE);
 
             UIManager.put("TitlePane.foreground", Color.WHITE);
             UIManager.put("TitlePane.embeddedForeground", Color.WHITE);
 
-
-            FlatLightLaf.setup();
-            FlatLafUtils.setup();
-
             UIManager.put("TitlePane.buttonHoverBackground", FlatLafUtils.accentColor);
+            UIManager.put("MenuBar.hoverBackground", FlatLafUtils.accentColor);
+            UIManager.put("TitlePane.buttonPressedBackground", FlatLafUtils.accentColor.darker());
 
 
             JFrame jFrame = new JFrame("Scene");
