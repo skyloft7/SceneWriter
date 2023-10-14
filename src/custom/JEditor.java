@@ -5,7 +5,6 @@ import flatlaf.FlatLafUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
@@ -178,7 +177,7 @@ public class JEditor extends JTextPane {
 
         //Live Typing with new attributes
         {
-            getStyledDocument().addDocumentListener(new DocumentListener() {
+            getStyledDocument().addDocumentListener(new DocumentAdapter() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
 
@@ -191,14 +190,6 @@ public class JEditor extends JTextPane {
                         else getStyledDocument().setCharacterAttributes(e.getOffset(), 1, cursorAttributes, false);
                     });
 
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
                 }
             });
         }
@@ -297,7 +288,7 @@ public class JEditor extends JTextPane {
 
         //List Auto-Indent
         {
-            getStyledDocument().addDocumentListener(new DocumentListener() {
+            getStyledDocument().addDocumentListener(new DocumentAdapter() {
                 @Override
                 public void insertUpdate(DocumentEvent e) {
                     SwingUtilities.invokeLater(() -> {
@@ -342,16 +333,6 @@ public class JEditor extends JTextPane {
 
 
                     });
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-
                 }
             });
         }
