@@ -69,7 +69,7 @@ public class JDockableWindow extends JPanel {
 
             @Override
             public Insets getBorderInsets(Component c) {
-                return new Insets(5, 5, 5, 5);
+                return new Insets(3, 3, 3, 3);
             }
 
             @Override
@@ -81,15 +81,54 @@ public class JDockableWindow extends JPanel {
         header.add(titleText, BorderLayout.WEST);
 
 
-
-
-
-
-
-
-
         add(header, BorderLayout.NORTH);
-        setBorder(BorderFactory.createTitledBorder(""));
+        setBorder(new Border() {
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                Graphics2D graphics2D = (Graphics2D) g;
+
+
+
+                graphics2D.setStroke(new BasicStroke(3));
+                graphics2D.setColor(UIManager.getColor("Separator.foreground"));
+
+                int offset = 10;
+
+
+                if(getDockPos().equals(BorderLayout.WEST)){
+                    graphics2D.drawLine(x + width, offset, x + width, y + height - offset);
+                }
+
+
+
+                if(getDockPos().equals(BorderLayout.EAST)){
+                    graphics2D.drawLine(0, offset, 0, y + height - offset);
+                }
+
+
+
+                if(getDockPos().equals(BorderLayout.NORTH)){
+                    graphics2D.drawLine(offset, y + height, x + width - offset, y + height);
+                }
+                if(getDockPos().equals(BorderLayout.SOUTH)){
+                    graphics2D.drawLine(offset, 0, x + width - offset, 0);
+                }
+
+
+
+
+            }
+
+            @Override
+            public Insets getBorderInsets(Component c) {
+                return new Insets(5, 5, 5, 5);
+            }
+
+            @Override
+            public boolean isBorderOpaque() {
+                return false;
+            }
+        });
 
 
 

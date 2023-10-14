@@ -27,9 +27,17 @@ public class Main {
 
             UILayoutSerializer uiLayoutSerializer = new UILayoutSerializer();
 
+            UIManager.put("RootPane.background", Color.BLACK);
+            UIManager.put("MenuBar.foreground", Color.WHITE);
+
+            UIManager.put("TitlePane.foreground", Color.WHITE);
+            UIManager.put("TitlePane.embeddedForeground", Color.WHITE);
+
+
             FlatLightLaf.setup();
             FlatLafUtils.setup();
 
+            UIManager.put("TitlePane.buttonHoverBackground", FlatLafUtils.accentColor);
 
 
             JFrame jFrame = new JFrame("Scene");
@@ -51,6 +59,8 @@ public class Main {
                             SwingUtilities.updateComponentTreeUI(jFrame);
                             jFrame.repaint();
                         });
+
+
                     }
                     settings.add(darkMode);
 
