@@ -36,6 +36,7 @@ public class JDockspace extends JPanel {
     }
 
     private AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.50f);
+    private AlphaComposite hover = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f);
 
     @Override
     public void paint(Graphics graphics) {
@@ -51,13 +52,40 @@ public class JDockspace extends JPanel {
 
 
             //East
-            graphics2D.fillRect(getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2), dockDistance, dockDistance);
+            Rectangle east = new Rectangle(getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2), dockDistance, dockDistance);
+            graphics2D.fill(east);
             //West
-            graphics2D.fillRect(0, (getHeight() / 2 - dockDistance / 2), dockDistance, dockDistance);
+            Rectangle west = new Rectangle(0, (getHeight() / 2 - dockDistance / 2), dockDistance, dockDistance);
+            graphics2D.fill(west);
             //North
-            graphics2D.fillRect((getWidth() / 2 - dockDistance / 2), 0, dockDistance, dockDistance);
+            Rectangle north = new Rectangle((getWidth() / 2 - dockDistance / 2), 0, dockDistance, dockDistance);
+            graphics2D.fill(north);
             //South
-            graphics2D.fillRect((getWidth() / 2 - dockDistance / 2), (getHeight() - dockDistance), dockDistance, dockDistance);
+            Rectangle south = new Rectangle((getWidth() / 2 - dockDistance / 2), (getHeight() - dockDistance), dockDistance, dockDistance);
+            graphics2D.fill(south);
+
+
+
+            //"Place Here" Indicator
+            graphics2D.setComposite(hover);
+            graphics2D.setStroke(new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+
+            if(east.contains(getMousePosition())){
+                graphics2D.drawLine(getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2), getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2) + dockDistance);
+            }
+            if(west.contains(getMousePosition())){
+                graphics2D.drawLine(dockDistance, (getHeight() / 2 - dockDistance / 2), dockDistance, (getHeight() / 2 - dockDistance / 2) + dockDistance);
+            }
+            if(north.contains(getMousePosition())){
+                graphics2D.drawLine((getWidth() / 2 - dockDistance / 2), dockDistance, (getWidth() / 2 - dockDistance / 2) + dockDistance, dockDistance);
+            }
+            if(south.contains(getMousePosition())){
+                graphics2D.drawLine((getWidth() / 2 - dockDistance / 2), getHeight() - dockDistance, (getWidth() / 2 - dockDistance / 2) + dockDistance, getHeight() - dockDistance);
+            }
+
+
+
+
         }
 
         graphics2D.dispose();
