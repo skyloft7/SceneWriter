@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/vendor/LanguageTool-3.2/org" />
+      <root url="file://$PROJECT_DIR$/vendor/LanguageTool-3.2/libs" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/vendor/LanguageTool-3.2/libs" recursive="false" />
+  </library>
+</component>

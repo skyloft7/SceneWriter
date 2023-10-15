@@ -9,7 +9,6 @@ import scene.ui.FileChoosers;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
 import scene.ui.MenuAdapter;
-import scene.ui.diagram.JDiagramEditor;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -109,14 +108,13 @@ public class Main {
             JDockspace jDockspace = new JDockspace();
             {
 
-                JDockableWindow sourceEditor = new EditorPanel(), characterMap = new JDockableWindow("Character Map");
+                JDockableWindow sourceEditor = new EditorPanel();
 
-                characterMap.add(new JDiagramEditor());
+
 
 
                 //Overrides preferredSize
                 jDockspace.addWindow(sourceEditor, BorderLayout.WEST);
-                jDockspace.addWindow(characterMap, BorderLayout.EAST);
 
                 sourceEditor.setPreferredSize(new Dimension(sourceEditor.getPreferredSize().width + 400, sourceEditor.getPreferredSize().height));
 

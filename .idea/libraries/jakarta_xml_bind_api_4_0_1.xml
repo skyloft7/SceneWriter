@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jakarta.xml.bind-api-4.0.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/vendor/jakarta.xml.bind-api-4.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

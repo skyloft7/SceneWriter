@@ -21,6 +21,7 @@ public class JEditor extends JTextPane {
 
     private UndoManager manager = new UndoManager();
     private ArrayList<Note> notes = new ArrayList<>();
+
     private DefaultHighlighter.DefaultHighlightPainter noteHighlighter;
     private PopupLifetimeManager popupLifetimeManager = new PopupLifetimeManager();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
@@ -29,11 +30,12 @@ public class JEditor extends JTextPane {
 
 
     public JEditor() {
-
         super();
         setStyledDocument(new EditorDocument());
-
+        getStyledDocument().addUndoableEditListener(manager);
+        popupLifetimeManager.install(this);
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
+
         StyleConstants.setFontFamily(cursorAttributes, getFont().getFamily());
 
 
@@ -161,10 +163,6 @@ public class JEditor extends JTextPane {
                 }
             });
         }
-
-
-        popupLifetimeManager.install(this);
-
         //Live Typing with new attributes
         {
             getStyledDocument().addDocumentListener(new DocumentAdapter() {
@@ -183,7 +181,6 @@ public class JEditor extends JTextPane {
                 }
             });
         }
-
         //Keyboard I/U/and B shortcuts and Ctrl+Z, and Ctrl+Y
         {
 
@@ -275,7 +272,6 @@ public class JEditor extends JTextPane {
                 }
             });
         }
-
         //List Auto-Indent
         {
             getStyledDocument().addDocumentListener(new DocumentAdapter() {
@@ -325,13 +321,26 @@ public class JEditor extends JTextPane {
                 }
             });
         }
+        //Spellcheck
+        {
+
+            getStyledDocument().addDocumentListener(new DocumentAdapter(){
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    //new Spellchecker().start(JEditor.this, false, true);
+                }
+            });
+
+
+            Spellchecker spellchecker = new Spellchecker();
+            spellchecker.start(this, true, false);
 
 
 
 
-        getStyledDocument().addUndoableEditListener(manager);
+        }
+
     }
-
 
 
     public void showNotePopup(Point point, Note note){
@@ -374,6 +383,7 @@ public class JEditor extends JTextPane {
 
         popup.show();
     }
+
 
     private boolean isSelectingText(){
         return getSelectionEnd() - getSelectionStart() > 0;
