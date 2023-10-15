@@ -8,9 +8,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import static java.awt.event.KeyEvent.*;
@@ -20,7 +22,7 @@ public class JEditor extends JTextPane {
     private UndoManager manager = new UndoManager();
     private ArrayList<Note> notes = new ArrayList<>();
     private DefaultHighlighter.DefaultHighlightPainter noteHighlighter;
-    private HashMap<String, PopupContext> popups = new HashMap<>();
+    private PopupLifetimeManager popupLifetimeManager = new PopupLifetimeManager();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
     private Analyzer analyzer = new Analyzer();
 
@@ -161,22 +163,7 @@ public class JEditor extends JTextPane {
         }
 
 
-        //Popup Drama (Close-on-exit)
-        {
-            addMouseMotionListener(new MouseMotionAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    for(PopupContext c : popups.values()){
-                        Point p = SwingUtilities.convertPoint(JEditor.this, e.getPoint(), c.component);
-
-                        if(!c.component.contains(p)){
-                            if(c.popupListener != null) c.popupListener.popupClosing(c.popup);
-                            c.popup.hide();
-                        }
-                    }
-                }
-            });
-        }
+        popupLifetimeManager.install(this);
 
         //Live Typing with new attributes
         {
@@ -382,7 +369,7 @@ public class JEditor extends JTextPane {
         });
 
 
-        popups.put("newNotePopup", new PopupContext(popup, panel, popup1 -> note.text = noteText.getText()));
+        popupLifetimeManager.register("newNotePopup", new PopupContext(popup, panel, popup1 -> note.text = noteText.getText()));
 
 
         popup.show();
