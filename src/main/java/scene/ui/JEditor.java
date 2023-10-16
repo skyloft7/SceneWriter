@@ -8,10 +8,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -26,6 +23,7 @@ public class JEditor extends JTextPane {
     private PopupLifetimeManager popupLifetimeManager = new PopupLifetimeManager();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
     private Analyzer analyzer = new Analyzer();
+    private AnalyticSpellchecker analyticSpellchecker = new AnalyticSpellchecker();
 
 
 
@@ -324,20 +322,24 @@ public class JEditor extends JTextPane {
         //Spellcheck
         {
 
-            getStyledDocument().addDocumentListener(new DocumentAdapter(){
+            //Note! Copy and pasting requires running the Spellchecker on everything one time
+
+            Action pasteAction = getActionMap().get("paste-from-clipboard");
+            getActionMap().put("paste-from-clipboard", new AbstractAction() {
                 @Override
-                public void insertUpdate(DocumentEvent e) {
-                    //new Spellchecker().start(JEditor.this, false, true);
+                public void actionPerformed(ActionEvent e) {
+                    pasteAction.actionPerformed(e);
+
+                    
+
+
+
+
                 }
             });
 
 
-            Spellchecker spellchecker = new Spellchecker();
-            spellchecker.start(this, true, false);
-
-
-
-
+            analyticSpellchecker.start(this);
         }
 
     }
