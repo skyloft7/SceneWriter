@@ -15,12 +15,15 @@ import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Spellchecker {
 
-    private final SyncSpellcheckLock updateAllLock = new SyncSpellcheckLock();
+    //private final SyncSpellcheckLock updateAllLock = new SyncSpellcheckLock();
 
+    private ReentrantLock updateAllLock = new ReentrantLock();
     private String info = "";
 
 
@@ -43,10 +46,17 @@ public class Spellchecker {
 
                     //System.out.println("Before Wait: " + System.currentTimeMillis());
 
-                    System.out.println("Start");
+                    System.out.println("\nStart");
 
-                    //stuck waiting here because now updateAllLock is owned by EDT
-                    synchronized (updateAllLock){
+                    System.out.println(updateAllLock.isLocked());
+
+
+                    updateAllLock.lock();
+
+                    System.out.println("Aqcuired lock!");
+
+
+                    try {
                         if(!info.isEmpty()){
 
                             //System.out.println("Got message!");
@@ -55,6 +65,13 @@ public class Spellchecker {
                             info = "";
                         }
                     }
+                    finally {
+
+
+                        updateAllLock.unlock();
+                    }
+
+                    System.out.println("Made it here!");
 
                     spellcheckLine(languageTool, jEditor);
 
@@ -128,6 +145,9 @@ public class Spellchecker {
         }
     }
 
+
+
+    //This is blocking!
     private void spellcheckLine(JLanguageTool languageTool, JEditor jEditor) {
 
         String currentLineText = Utils.currentLine(jEditor);
@@ -147,97 +167,103 @@ public class Spellchecker {
 
 
 
+
         //Creating Highlights
         {
 
             for (RuleMatch match : matches) {
+                int caretPosition = jEditor.getCaretPosition();
+                Element root = jEditor.getDocument().getDefaultRootElement();
+                int line = root.getElementIndex(caretPosition);
+                Element lineElement = root.getElement(line);
 
-                SwingUtilities.invokeLater(() -> {
-
-                    int caretPosition = jEditor.getCaretPosition();
-                    Element root = jEditor.getDocument().getDefaultRootElement();
-
-
-
-                    //Needs to change for all the text
-                    int line = root.getElementIndex(caretPosition);
-                    Element lineElement = root.getElement(line);
-
-                    int start = lineElement.getStartOffset() + match.getFromPos();
-                    int end = lineElement.getStartOffset() + match.getToPos();
+                int start = lineElement.getStartOffset() + match.getFromPos();
+                int end = lineElement.getStartOffset() + match.getToPos();
 
 
-                    Error error = new Error(match.getFromPos(), match.getToPos(), match.getMessage());
-                    error.startOffsetDoc = start;
-                    error.endOffsetDoc = end;
-                    error.line = line;
+                Error error = new Error(match.getFromPos(), match.getToPos(), match.getMessage());
+                error.startOffsetDoc = start;
+                error.endOffsetDoc = end;
+                error.line = line;
 
 
 
-                    if(!errors.contains(error)){
-                        errors.add(error);
+                if(!errors.contains(error)){
+                    errors.add(error);
 
-                        SwingUtilities.invokeLater(() -> {
-                            try {
-                                error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(error.startOffsetDoc, error.endOffsetDoc, errorHighlighter);
-                            } catch (BadLocationException e) {
-                                throw new RuntimeException(e);
-                            }
-                            jEditor.repaint();
-                        });
-
+                    SwingUtilities.invokeLater(() -> {
                         try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
+                            error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(error.startOffsetDoc, error.endOffsetDoc, errorHighlighter);
+                        } catch (BadLocationException e) {
                             throw new RuntimeException(e);
                         }
+                        jEditor.repaint();
+                    });
 
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
 
-
-
-
-                });
-
-
-
+                }
 
             }
         }
+
+
 
         //Removing stale Highlights
         {
 
 
-            List<RuleMatch> finalMatches1 = matches;
-            errors.removeIf(error -> {
+            for (Iterator<Error> iterator = errors.iterator(); iterator.hasNext(); ) {
+                Error error = iterator.next();
+
+                int caretPosition = jEditor.getCaretPosition();
+                Element root = jEditor.getDocument().getDefaultRootElement();
 
 
 
-                for(RuleMatch match : finalMatches1){
-                    if(error.startOffset == match.getFromPos() && error.endOffset == match.getToPos()) return false;
+                //Needs to change for all the text
+                int line = root.getElementIndex(caretPosition);
+
+                if(line != error.line) continue;
+
+
+                if(!matchError(matches, error)) {
+                    SwingUtilities.invokeLater(() -> {
+                        jEditor.getHighlighter().removeHighlight(error.highlight);
+                        jEditor.repaint();
+                    });
+                    iterator.remove();
                 }
 
-
-
-                SwingUtilities.invokeLater(() -> jEditor.getHighlighter().removeHighlight(error.highlight));
-
-                return true;
-            });
-
-
-
+            }
 
 
         }
+    }
+
+    private boolean matchError(List<RuleMatch> r, Error error){
+        for(RuleMatch match : r){
+            if(error.startOffset == match.getFromPos() && error.endOffset == match.getToPos()) return true;
+        }
+
+        return false;
     }
 
     public void updateAll(String entireText){
-        synchronized (updateAllLock){
+
+        updateAllLock.lock();
+
+        try {
             info = entireText;
-            updateAllLock.notifyAll();
         }
+        finally {
+            updateAllLock.unlock();
+        }
+
     }
 
-    private class SyncSpellcheckLock {}
 }
