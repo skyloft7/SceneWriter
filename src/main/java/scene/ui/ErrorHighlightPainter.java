@@ -15,11 +15,14 @@ public class ErrorHighlightPainter implements Highlighter.HighlightPainter {
     @Override
     public void paint(Graphics g, int p0, int p1, Shape shape, JTextComponent c) {
         Graphics2D graphics2D = (Graphics2D) g.create();
-        graphics2D.setStroke(new BasicStroke(2));
+        graphics2D.setStroke(new BasicStroke(1.5f));
         graphics2D.setColor(Color.RED);
 
         TextUI mapper = c.getUI();
         try {
+
+            System.out.println("p0:" + p0);
+
             Rectangle r1 = mapper.modelToView(c, p0);
             Rectangle r2 = mapper.modelToView(c, p1);
 

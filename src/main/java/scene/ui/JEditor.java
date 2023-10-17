@@ -23,10 +23,6 @@ public class JEditor extends JTextPane {
     private PopupLifetimeManager popupLifetimeManager = new PopupLifetimeManager();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
     private Analyzer analyzer = new Analyzer();
-    private AnalyticSpellchecker analyticSpellchecker = new AnalyticSpellchecker();
-
-
-
     public JEditor() {
         super();
         setStyledDocument(new EditorDocument());
@@ -322,6 +318,9 @@ public class JEditor extends JTextPane {
         //Spellcheck
         {
 
+            Spellchecker spellchecker = new Spellchecker();
+            spellchecker.start(this);
+
             //Note! Copy and pasting requires running the Spellchecker on everything one time
 
             Action pasteAction = getActionMap().get("paste-from-clipboard");
@@ -330,16 +329,26 @@ public class JEditor extends JTextPane {
                 public void actionPerformed(ActionEvent e) {
                     pasteAction.actionPerformed(e);
 
-                    
 
+                    //EverythingASpellchecker everythingSpellchecker = new EverythingASpellchecker(JEditor.this);
+                    //everythingSpellchecker.start(JEditor.this);
 
-
+                    spellchecker.updateAll(JEditor.this.getText());
 
                 }
             });
 
+            //AnalyticASpellchecker analyticSpellchecker = new AnalyticASpellchecker(JEditor.this);
+            //analyticSpellchecker.start(this);
 
-            analyticSpellchecker.start(this);
+
+
+
+
+
+
+
+
         }
 
     }
@@ -408,6 +417,7 @@ public class JEditor extends JTextPane {
     public ArrayList<Note> getNotes() {
         return notes;
     }
+
 
     private class Analyzer {
         public boolean shouldIndentLine(String text){

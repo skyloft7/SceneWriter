@@ -1,5 +1,6 @@
 package scene.ui;
 
+import com.formdev.flatlaf.util.SystemInfo;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
 import org.languagetool.rules.RuleMatch;
@@ -11,17 +12,13 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class AnalyticSpellchecker extends Spellchecker {
-    private List<RuleMatch> matches;
-    private ArrayList<Error> errors = new ArrayList<>();
-    private Highlighter.HighlightPainter errorHighlighter;
-    public AnalyticSpellchecker(){
-        errorHighlighter = new ErrorHighlightPainter();
+public class AnalyticASpellchecker extends ASpellchecker {
 
+
+    public AnalyticASpellchecker(JEditor editor) {
+        super(editor);
     }
 
     public void start(JEditor jEditor){
@@ -29,9 +26,10 @@ public class AnalyticSpellchecker extends Spellchecker {
             @Override
             protected Object doInBackground() {
                 JLanguageTool languageTool = new JLanguageTool(Languages.getLanguageForShortCode("en-GB"));
-                while(true) AnalyticSpellchecker.this.run(jEditor, languageTool);
+                while(true) AnalyticASpellchecker.this.run(jEditor, languageTool);
             }
         };
+
 
 
         spellcheckThread.execute();
@@ -45,12 +43,17 @@ public class AnalyticSpellchecker extends Spellchecker {
 
         String currentLineText = Utils.currentLine(jEditor);
 
+        if(SystemInfo.isWindows)
+            currentLineText = currentLineText.replaceAll("\r\n", "\n");
+
+
+
+        List<RuleMatch> matches = null;
         try {
             matches = languageTool.check(currentLineText);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
 
         //Creating Highlights
         {
@@ -77,9 +80,9 @@ public class AnalyticSpellchecker extends Spellchecker {
                     error.endOffsetDoc = end;
                     error.line = line;
 
-                    System.out.println(match.getMessage());
 
-                    if (!errors.contains(error)) {
+
+                    if (!editor.getErrors().contains(error)) {
                         try {
                             error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
                             jEditor.repaint();
@@ -88,7 +91,7 @@ public class AnalyticSpellchecker extends Spellchecker {
                         } catch (BadLocationException e) {
                             throw new RuntimeException(e);
                         }
-                        errors.add(error);
+                        editor.getErrors().add(error);
                     }
                 });
 
@@ -105,36 +108,24 @@ public class AnalyticSpellchecker extends Spellchecker {
         //Removing stale Highlights
         {
             List<RuleMatch> finalMatches = matches;
-            errors.removeIf(error -> {
 
-                //Needs to change for all the text
-
-                int caretPosition = jEditor.getCaretPosition();
-                Element root = jEditor.getDocument().getDefaultRootElement();
-                int line = root.getElementIndex(caretPosition);
-
-                if (line != error.line) return false;
-
+            SwingUtilities.invokeLater(() -> editor.getErrors().removeIf(error -> {
 
 
                 for(RuleMatch match : finalMatches){
                     if(error.startOffset == match.getFromPos() && error.endOffset == match.getToPos()) return false;
                 }
 
-                //Stale
+                System.out.println("someone leave");
 
-                try {
-                    SwingUtilities.invokeAndWait(() -> {
-                        jEditor.getHighlighter().removeHighlight(error.highlight);
-                        jEditor.repaint();
-                    });
-                }
-                catch (InterruptedException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
+
 
                 return true;
-            });
+            }));
+
+
+
+
 
         }
     }
