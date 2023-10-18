@@ -70,17 +70,22 @@ public class JDockspace extends JPanel {
             graphics2D.setComposite(hover);
             graphics2D.setStroke(new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
 
-            if(east.contains(getMousePosition())){
-                graphics2D.drawLine(getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2), getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2) + dockDistance);
-            }
-            if(west.contains(getMousePosition())){
-                graphics2D.drawLine(dockDistance, (getHeight() / 2 - dockDistance / 2), dockDistance, (getHeight() / 2 - dockDistance / 2) + dockDistance);
-            }
-            if(north.contains(getMousePosition())){
-                graphics2D.drawLine((getWidth() / 2 - dockDistance / 2), dockDistance, (getWidth() / 2 - dockDistance / 2) + dockDistance, dockDistance);
-            }
-            if(south.contains(getMousePosition())){
-                graphics2D.drawLine((getWidth() / 2 - dockDistance / 2), getHeight() - dockDistance, (getWidth() / 2 - dockDistance / 2) + dockDistance, getHeight() - dockDistance);
+            Point mousePos = getMousePosition();
+
+            if(mousePos != null) {
+
+                if (east.contains(mousePos)) {
+                    graphics2D.drawLine(getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2), getWidth() - dockDistance, (getHeight() / 2 - dockDistance / 2) + dockDistance);
+                }
+                if (west.contains(mousePos)) {
+                    graphics2D.drawLine(dockDistance, (getHeight() / 2 - dockDistance / 2), dockDistance, (getHeight() / 2 - dockDistance / 2) + dockDistance);
+                }
+                if (north.contains(mousePos)) {
+                    graphics2D.drawLine((getWidth() / 2 - dockDistance / 2), dockDistance, (getWidth() / 2 - dockDistance / 2) + dockDistance, dockDistance);
+                }
+                if (south.contains(mousePos)) {
+                    graphics2D.drawLine((getWidth() / 2 - dockDistance / 2), getHeight() - dockDistance, (getWidth() / 2 - dockDistance / 2) + dockDistance, getHeight() - dockDistance);
+                }
             }
 
 

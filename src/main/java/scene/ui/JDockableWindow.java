@@ -14,11 +14,11 @@ public class JDockableWindow extends JPanel {
 
     private Object myDockspacePos;
     private int myDockDistance = 0;
-
     private Dimension vPreferredSize, hPreferredSize;
     private int amnestySize = 50;
-
     private String title;
+
+    private boolean windowMode;
 
     public JDockableWindow(String title){
         this.title = title;
@@ -203,34 +203,38 @@ public class JDockableWindow extends JPanel {
                 }
                 else {
 
-                    JDialog jDialog = new JDialog();
-                    jDialog.setTitle(title);
+                    if(!windowMode) {
+                        JDialog jDialog = new JDialog();
+                        jDialog.setTitle(title);
 
 
+                        parent.remove(JDockableWindow.this);
+                        parent.revalidate();
+                        parent.repaint();
 
-                    parent.remove(JDockableWindow.this);
-                    parent.revalidate();
-                    parent.repaint();
+                        jDialog.setLayout(new BorderLayout());
+                        jDialog.add(JDockableWindow.this);
+                        jDialog.setSize(getSize());
+                        jDialog.setVisible(true);
 
-                    jDialog.setLayout(new BorderLayout());
-                    jDialog.add(JDockableWindow.this);
-                    jDialog.setSize(getSize());
-                    jDialog.setVisible(true);
-
-                    jDialog.setLocation(MouseInfo.getPointerInfo().getLocation());
+                        jDialog.setLocation(MouseInfo.getPointerInfo().getLocation());
 
 
-                    jDialog.addWindowListener(new WindowAdapter() {
-                        @Override
-                        public void windowClosing(WindowEvent e) {
+                        jDialog.addWindowListener(new WindowAdapter() {
+                            @Override
+                            public void windowClosing(WindowEvent e) {
+                                JDockableWindow.this.setPreferredSize(jDialog.getSize());
 
-                            JDockableWindow.this.setPreferredSize(jDialog.getSize());
+                                parent.add(JDockableWindow.this, myDockspacePos);
+                                parent.revalidate();
+                                parent.repaint();
 
-                            parent.add(JDockableWindow.this, myDockspacePos);
-                            parent.revalidate();
-                            parent.repaint();
-                        }
-                    });
+                                windowMode = false;
+                            }
+                        });
+
+                        windowMode = true;
+                    }
 
                 }
 
