@@ -9,10 +9,8 @@ import thirdparty.Utils;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
-import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,7 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Spellchecker {
 
-    //private final SyncSpellcheckLock updateAllLock = new SyncSpellcheckLock();
 
     private ReentrantLock updateAllLock = new ReentrantLock();
     private String info = "";
@@ -44,22 +41,13 @@ public class Spellchecker {
                 while(true){
 
 
-                    //System.out.println("Before Wait: " + System.currentTimeMillis());
-
-                    System.out.println("\nStart");
-
-                    System.out.println(updateAllLock.isLocked());
-
-
                     updateAllLock.lock();
 
-                    System.out.println("Aqcuired lock!");
 
 
                     try {
                         if(!info.isEmpty()){
 
-                            //System.out.println("Got message!");
                             spellcheckEverything(languageTool, jEditor, jEditor.getText());
 
                             info = "";
@@ -71,11 +59,8 @@ public class Spellchecker {
                         updateAllLock.unlock();
                     }
 
-                    System.out.println("Made it here!");
 
                     spellcheckLine(languageTool, jEditor);
-
-                    System.out.println("End");
 
 
                 }
@@ -97,7 +82,7 @@ public class Spellchecker {
     //FIXME: NOT ON EDT!!!!!
     private ArrayList<Error> errors = new ArrayList<>();
 
-    public Highlighter.HighlightPainter errorHighlighter = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);//new ErrorHighlightPainter();
+    public Highlighter.HighlightPainter errorHighlighter = new ErrorHighlightPainter();
 
 
     private void spellcheckEverything(JLanguageTool languageTool, JEditor jEditor, String text){
@@ -119,6 +104,12 @@ public class Spellchecker {
                 Error error = new Error(ruleMatch.getFromPos(), ruleMatch.getToPos(), ruleMatch.getMessage());
                 error.startOffsetDoc = ruleMatch.getFromPos();
                 error.endOffsetDoc = ruleMatch.getToPos();
+                Element root = jEditor.getDocument().getDefaultRootElement();
+
+                //Error doesn't have a line here!
+                error.line = root.getElementIndex(error.startOffsetDoc);
+                //System.out.println(error.line);
+
 
                 if(!errors.contains(error)){
                     errors.add(error);
@@ -135,6 +126,7 @@ public class Spellchecker {
                 }
 
 
+
                 //Thread.sleep() here?
 
 
@@ -142,15 +134,23 @@ public class Spellchecker {
 
             }
 
+            System.out.println();
+
         }
     }
 
 
 
-    //This is blocking!
+    //Soemtimes this clears previous errors that are corrupted for some reason
     private void spellcheckLine(JLanguageTool languageTool, JEditor jEditor) {
 
-        String currentLineText = Utils.currentLine(jEditor);
+        Element element = Utils.currentLine(jEditor);
+        String currentLineText = null;
+        try {
+            currentLineText = jEditor.getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
 
         if(SystemInfo.isWindows)
             currentLineText = currentLineText.replaceAll("\r\n", "\n");
@@ -185,6 +185,7 @@ public class Spellchecker {
                 error.startOffsetDoc = start;
                 error.endOffsetDoc = end;
                 error.line = line;
+
 
 
 
@@ -223,21 +224,45 @@ public class Spellchecker {
                 int caretPosition = jEditor.getCaretPosition();
                 Element root = jEditor.getDocument().getDefaultRootElement();
 
-
-
-                //Needs to change for all the text
                 int line = root.getElementIndex(caretPosition);
 
+
+
+                //Leave errors from other lines intact, this doesn't do much
+                //to stop invalidating errors that are on the same "line"
                 if(line != error.line) continue;
 
+                //This error is where the mouse currently is, check that one
 
-                if(!matchError(matches, error)) {
-                    SwingUtilities.invokeLater(() -> {
-                        jEditor.getHighlighter().removeHighlight(error.highlight);
-                        jEditor.repaint();
-                    });
-                    iterator.remove();
+                //Ignore spellchecking other errors, even on the same line, this is where the mouse is
+                if(caretPosition >= error.highlight.getStartOffset() && caretPosition <= error.highlight.getEndOffset()){
+
+                    if(!matchError(matches, error, element)){
+                        SwingUtilities.invokeLater(() -> {
+                            jEditor.getHighlighter().removeHighlight(error.highlight);
+                            jEditor.repaint();
+                        });
+                        iterator.remove();
+                    }
+
                 }
+
+                /*
+                BUG:
+
+                Copy-and-paste a paragraph of text
+
+                Write a line of text
+
+                Move cursor to line
+
+                Now move cursor to paragraph
+
+                All paragraph errors are recalculated, because the above code has a logic flaw
+
+
+                 */
+
 
             }
 
@@ -245,9 +270,14 @@ public class Spellchecker {
         }
     }
 
-    private boolean matchError(List<RuleMatch> r, Error error){
-        for(RuleMatch match : r){
-            if(error.startOffset == match.getFromPos() && error.endOffset == match.getToPos()) return true;
+    private boolean matchError(List<RuleMatch> r, Error error, Element element){
+        for(RuleMatch m : r){
+
+            int start = element.getStartOffset() + m.getFromPos();
+            int end = element.getStartOffset() + m.getToPos();
+
+            if(start == error.highlight.getStartOffset() && end == error.highlight.getEndOffset()) return true;
+
         }
 
         return false;

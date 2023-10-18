@@ -1,10 +1,10 @@
 package scene.ui;
 
-import javax.swing.plaf.TextUI;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 
 public class ErrorHighlightPainter implements Highlighter.HighlightPainter {
 
@@ -14,25 +14,60 @@ public class ErrorHighlightPainter implements Highlighter.HighlightPainter {
 
     @Override
     public void paint(Graphics g, int p0, int p1, Shape shape, JTextComponent c) {
-        Graphics2D graphics2D = (Graphics2D) g.create();
-        graphics2D.setStroke(new BasicStroke(1.5f));
-        graphics2D.setColor(Color.RED);
+        Rectangle2D r1, r2;
 
-        TextUI mapper = c.getUI();
         try {
+            r1 = c.modelToView2D(p0);
+            r2 = c.modelToView2D(p1);
 
-            System.out.println("p0:" + p0);
+            Rectangle2D highlight = r1.createUnion(r2);
 
-            Rectangle r1 = mapper.modelToView(c, p0);
-            Rectangle r2 = mapper.modelToView(c, p1);
+            Graphics2D graphics2D = (Graphics2D) g.create();
+            graphics2D.setStroke(new BasicStroke(1.0f));
+            graphics2D.setColor(Color.RED);
 
-            Rectangle bounds = r1.union(r2);
+            Rectangle2D bounds = ((Rectangle) shape).getBounds2D();
 
-            graphics2D.drawLine(bounds.x, bounds.y + bounds.height, bounds.x + bounds.width, bounds.y + bounds.height);
-        } catch (BadLocationException e) {
-            throw new RuntimeException(e);
+            //Same line
+            if(r1.getY() == r2.getY()){
+                graphics2D.drawLine(
+                        (int) highlight.getX(),
+                        (int) (highlight.getY() + highlight.getHeight()),
+                        (int) (highlight.getX() + highlight.getWidth()),
+                        (int) (highlight.getY() + highlight.getHeight()));
+            }
+            else {
+
+                graphics2D.setColor(new Color(234, 128, 252));
+                graphics2D.drawLine(
+                        (int) r1.getX(),
+                        (int) ((int) r1.getY() + r1.getHeight()),
+                        (int) (bounds.getWidth()),
+                        (int) ((int) r1.getY() + r1.getHeight())
+                );
+
+
+                graphics2D.drawLine(
+                        (int) bounds.getX(),
+                        (int) ((int) r2.getY() + r2.getHeight()),
+                        (int) r2.getX(),
+                        (int) ((int) r2.getY() + r2.getHeight()));
+
+
+
+
+
+            }
+
+
+
+
         }
-
+        catch (BadLocationException e){
+            //The given highlight might not be valid anymore because Spellchecker
+            //is constantly recomputing them, just return
+            return;
+        }
 
     }
 }

@@ -1,11 +1,10 @@
 package thirdparty;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 
 public class Utils {
-    public static String currentLine(JTextPane textTx)
+    public static Element currentLine(JTextPane textTx)
     {
         // Get section element
         Element section = textTx.getDocument().getDefaultRootElement();
@@ -25,17 +24,10 @@ public class Utils {
             int rangeStart = e1.getStartOffset();
             int rangeEnd = e1.getEndOffset();
 
-            try
-            {
-                String para = textTx.getText(rangeStart, rangeEnd-rangeStart);
+            //String para = textTx.getText(rangeStart, rangeEnd-rangeStart);
 
-                if (position >= rangeStart && position <= rangeEnd)
-                    return para;
-            }
-            catch (BadLocationException ex)
-            {
-                System.err.println("Get current line from editor error: " + ex.getMessage());
-            }
+            if (position >= rangeStart && position <= rangeEnd)
+                return e1;
         }
         return null;
     }
