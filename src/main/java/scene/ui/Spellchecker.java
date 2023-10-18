@@ -102,12 +102,10 @@ public class Spellchecker {
             for(RuleMatch ruleMatch : m){
 
                 Error error = new Error(ruleMatch.getFromPos(), ruleMatch.getToPos(), ruleMatch.getMessage());
-                error.startOffsetDoc = ruleMatch.getFromPos();
-                error.endOffsetDoc = ruleMatch.getToPos();
                 Element root = jEditor.getDocument().getDefaultRootElement();
 
                 //Error doesn't have a line here!
-                error.line = root.getElementIndex(error.startOffsetDoc);
+                error.line = root.getElementIndex(ruleMatch.getFromPos());
                 //System.out.println(error.line);
 
 
@@ -116,7 +114,7 @@ public class Spellchecker {
 
                     SwingUtilities.invokeLater(() -> {
                         try {
-                            error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(error.startOffsetDoc, error.endOffsetDoc, errorHighlighter);
+                            error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(ruleMatch.getFromPos(), ruleMatch.getToPos(), errorHighlighter);
                         } catch (BadLocationException e) {
                             throw new RuntimeException(e);
                         }
@@ -182,10 +180,7 @@ public class Spellchecker {
 
 
                 Error error = new Error(match.getFromPos(), match.getToPos(), match.getMessage());
-                error.startOffsetDoc = start;
-                error.endOffsetDoc = end;
                 error.line = line;
-
 
 
 
@@ -194,7 +189,7 @@ public class Spellchecker {
 
                     SwingUtilities.invokeLater(() -> {
                         try {
-                            error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(error.startOffsetDoc, error.endOffsetDoc, errorHighlighter);
+                            error.highlight = (Highlighter.Highlight) jEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
                         } catch (BadLocationException e) {
                             throw new RuntimeException(e);
                         }

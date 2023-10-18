@@ -2,7 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <excludeFromCompile>
-      <file url="file://$PROJECT_DIR$/src/docx/DocxWriter.java" />
+      <file url="file://$PROJECT_DIR$/src/main/java/scene/ui/EverythingASpellchecker.java" />
+      <file url="file://$PROJECT_DIR$/src/main/java/scene/ui/ASpellchecker.java" />
+      <file url="file://$PROJECT_DIR$/src/main/java/scene/ui/AnalyticASpellchecker.java" />
     </excludeFromCompile>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile" enabled="true">
