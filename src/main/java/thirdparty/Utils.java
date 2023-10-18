@@ -4,31 +4,20 @@ import javax.swing.*;
 import javax.swing.text.Element;
 
 public class Utils {
-    public static Element currentLine(JTextPane textTx)
-    {
-        // Get section element
-        Element section = textTx.getDocument().getDefaultRootElement();
 
-        // Get number of paragraphs.
-        // In a text pane, a span of characters terminated by single
-        // newline is typically called a paragraph.
-        int paraCount = section.getElementCount();
 
-        int position = textTx.getCaret().getDot();
+    public static Element currentLine(JTextPane j){
+        Element root = j.getDocument().getDefaultRootElement();
 
-        // Get index ranges for each paragraph
-        for (int i = 0; i < paraCount; i++)
-        {
-            Element e1 = section.getElement(i);
+        int caret = j.getCaretPosition();
 
-            int rangeStart = e1.getStartOffset();
-            int rangeEnd = e1.getEndOffset();
-
-            //String para = textTx.getText(rangeStart, rangeEnd-rangeStart);
-
-            if (position >= rangeStart && position <= rangeEnd)
-                return e1;
+        for (int i = 0; i < root.getElementCount(); i++) {
+            Element e = root.getElement(i);
+            if(caret >= e.getStartOffset() && caret <= e.getEndOffset()) return e;
         }
+
+
+
         return null;
     }
 }
