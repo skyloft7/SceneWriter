@@ -14,7 +14,7 @@ public class JDockableWindow extends JPanel {
 
     private Object myDockspacePos;
     private int myDockDistance = 0;
-    private Dimension vPreferredSize, hPreferredSize;
+    private Dimension vPreferredSize, hPreferredSize, windowPreferredSize;
     private int amnestySize = 50;
     private String title;
 
@@ -204,7 +204,7 @@ public class JDockableWindow extends JPanel {
                 else {
 
                     if(!windowMode) {
-                        JDialog jDialog = new JDialog();
+                        JDialog jDialog = new JDialog((Window) null);
                         jDialog.setTitle(title);
 
 
@@ -212,12 +212,26 @@ public class JDockableWindow extends JPanel {
                         parent.revalidate();
                         parent.repaint();
 
+
+
+                        windowPreferredSize = getPreferredSize();
+                        jDialog.setSize(windowPreferredSize);
+
+                        jDialog.addComponentListener(new ComponentAdapter() {
+                            @Override
+                            public void componentResized(ComponentEvent e) {
+                                windowPreferredSize = e.getComponent().getSize();
+                            }
+                        });
+
+                        Dimension oldSize = getPreferredSize();
+
                         jDialog.setLayout(new BorderLayout());
                         jDialog.add(JDockableWindow.this);
-                        jDialog.setSize(getSize());
                         jDialog.setVisible(true);
 
                         jDialog.setLocation(MouseInfo.getPointerInfo().getLocation());
+
 
 
                         jDialog.addWindowListener(new WindowAdapter() {
@@ -225,6 +239,16 @@ public class JDockableWindow extends JPanel {
                             public void windowClosing(WindowEvent e) {
                                 JDockableWindow.this.setPreferredSize(jDialog.getSize());
 
+                                componentResizer.registerComponent(JDockableWindow.this, resizeAxis -> {
+                                    if(resizeAxis == ResizeListener.ResizeAxis.HORIZONTAL){
+                                        hPreferredSize = getSize();
+                                    }
+                                    if(resizeAxis == ResizeListener.ResizeAxis.VERTICAL){
+                                        vPreferredSize = getSize();
+                                    }
+                                });
+
+                                setPreferredSize(oldSize);
                                 parent.add(JDockableWindow.this, myDockspacePos);
                                 parent.revalidate();
                                 parent.repaint();
@@ -234,6 +258,7 @@ public class JDockableWindow extends JPanel {
                         });
 
                         windowMode = true;
+                        componentResizer.deregisterComponent(JDockableWindow.this);
                     }
 
                 }
@@ -244,6 +269,7 @@ public class JDockableWindow extends JPanel {
             }
         });
     }
+
 
     private void setPosition(Container parent, Object newDockspacePos){
 
@@ -320,6 +346,11 @@ public class JDockableWindow extends JPanel {
     public Object getDockPos() {
         return myDockspacePos;
     }
+
+    public boolean isWindowMode() {
+        return windowMode;
+    }
+
 
     public String getTitle() {
         return title;
