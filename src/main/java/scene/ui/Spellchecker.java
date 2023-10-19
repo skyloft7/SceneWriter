@@ -234,20 +234,15 @@ public class Spellchecker {
                 //to stop invalidating errors that are on the same "line"
                 if(line != error.line) continue;
 
-                //This error is where the mouse currently is, check that one
 
-                //Ignore spellchecking other errors, even on the same line, this is where the mouse is
-                if(caretPosition >= error.highlight.getStartOffset() && caretPosition <= error.highlight.getEndOffset()){
-
-                    if(!matchError(matches, error, element)){
-                        SwingUtilities.invokeLater(() -> {
-                            jEditor.getHighlighter().removeHighlight(error.highlight);
-                            jEditor.repaint();
-                        });
-                        iterator.remove();
-                    }
-
+                if(!matchError(matches, error, element)){
+                    SwingUtilities.invokeLater(() -> {
+                        jEditor.getHighlighter().removeHighlight(error.highlight);
+                        jEditor.repaint();
+                    });
+                    iterator.remove();
                 }
+
             }
 
 
