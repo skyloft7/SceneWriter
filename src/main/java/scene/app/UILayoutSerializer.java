@@ -2,11 +2,11 @@ package scene.app;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
-import scene.ui.JDockableWindow;
-import scene.ui.JDockspace;
+import com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
+import scene.ui.JDockableWindow;
+import scene.ui.JDockspace;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,12 +63,15 @@ public class UILayoutSerializer {
             boolean darkMode = preferencesFile.getBoolean("DarkMode");
             {
 
+
                 if (darkMode) {
                     System.out.println("Dark mode is best mode");
-                    FlatArcDarkIJTheme.setup();
+                    FlatGradiantoDeepOceanIJTheme.setup();
                 } else {
                     FlatLightLaf.setup();
                 }
+
+
 
                 Window window = SwingUtilities.getWindowAncestor(jDockspace);
                 SwingUtilities.updateComponentTreeUI(window);

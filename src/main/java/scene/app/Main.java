@@ -2,10 +2,8 @@ package scene.app;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme;
 import flatlaf.FlatLafUtils;
-import scene.markdown.MarkdownFileFilter;
-import scene.ui.FileChoosers;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
 import scene.ui.MenuAdapter;
@@ -33,6 +31,7 @@ public class Main {
 
 
 
+
             FlatLightLaf.setup();
             FlatLafUtils.setup();
 
@@ -56,14 +55,12 @@ public class Main {
 
                 JMenu open = new JMenu("Open");
                 {
-
                     open.addMenuListener(new MenuAdapter(){
                         @Override
                         public void menuSelected(MenuEvent e) {
                             Workspaces.get("Source")
                                     .getSignal(EditorPanel.OpenFileSignal.class)
-                                    .open(FileChoosers.showOpenDialog(MarkdownFileFilter.filter));
-
+                                    .open();
                         }
                     });
                 }
@@ -76,7 +73,7 @@ public class Main {
                         darkMode.setSelected(FlatLaf.isLafDark());
                         darkMode.addActionListener(e -> {
 
-                            if (darkMode.isSelected()) FlatArcDarkIJTheme.setup();
+                            if (darkMode.isSelected()) FlatGradiantoDeepOceanIJTheme.setup();
                             else FlatLightLaf.setup();
 
                             SwingUtilities.updateComponentTreeUI(jFrame);
@@ -101,7 +98,10 @@ public class Main {
 
                 jMenuBar.add(settings);
 
+
             }
+
+
             jFrame.setJMenuBar(jMenuBar);
 
 
