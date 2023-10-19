@@ -13,6 +13,7 @@ import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -80,7 +81,7 @@ public class Spellchecker {
     }
 
     //FIXME: NOT ON EDT!!!!!
-    private ArrayList<Error> errors = new ArrayList<>();
+    private List<Error> errors = Collections.synchronizedList(new ArrayList<>());//new ArrayList<>();
 
     public Highlighter.HighlightPainter errorHighlighter = new ErrorHighlightPainter();
 
@@ -106,6 +107,7 @@ public class Spellchecker {
 
                 //Error doesn't have a line here!
                 error.line = root.getElementIndex(ruleMatch.getFromPos());
+                error.suggestions = ruleMatch.getSuggestedReplacements();
                 //System.out.println(error.line);
 
 
@@ -181,6 +183,7 @@ public class Spellchecker {
 
                 Error error = new Error(match.getFromPos(), match.getToPos(), match.getMessage());
                 error.line = line;
+                error.suggestions = match.getSuggestedReplacements();
 
 
 
@@ -197,6 +200,10 @@ public class Spellchecker {
                     });
 
                     try {
+                        //This thread.sleep shouldn't be here because
+                        //We can only dispatch things to the EDT when
+                        //errors don't have them, so we should be doing
+                        //spellchecking as fast as possible
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
@@ -241,24 +248,6 @@ public class Spellchecker {
                     }
 
                 }
-
-                /*
-                BUG:
-
-                Copy-and-paste a paragraph of text
-
-                Write a line of text
-
-                Move cursor to line
-
-                Now move cursor to paragraph
-
-                All paragraph errors are recalculated, because the above code has a logic flaw
-
-
-                 */
-
-
             }
 
 
@@ -291,4 +280,7 @@ public class Spellchecker {
 
     }
 
+    public List<Error> getErrors() {
+        return errors;
+    }
 }

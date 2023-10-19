@@ -2,6 +2,7 @@ package scene.ui;
 
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import flatlaf.FlatLafUtils;
+import scene.app.Error;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -23,6 +24,9 @@ public class JEditor extends JTextPane {
     private PopupLifetimeManager popupLifetimeManager = new PopupLifetimeManager();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
     private Analyzer analyzer = new Analyzer();
+    private Spellchecker spellchecker = new Spellchecker();
+
+
     public JEditor() {
         super();
         setStyledDocument(new EditorDocument());
@@ -31,6 +35,7 @@ public class JEditor extends JTextPane {
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
 
         StyleConstants.setFontFamily(cursorAttributes, getFont().getFamily());
+
 
 
         //Context Menu
@@ -318,28 +323,34 @@ public class JEditor extends JTextPane {
         //Spellcheck
         {
 
-            Spellchecker spellchecker = new Spellchecker();
-            spellchecker.start(this);
 
-            //Note! Copy and pasting requires running the Spellchecker on everything one time
+            spellchecker.start(this);
 
             Action pasteAction = getActionMap().get("paste-from-clipboard");
             getActionMap().put("paste-from-clipboard", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     pasteAction.actionPerformed(e);
-
-
-                    //EverythingASpellchecker everythingSpellchecker = new EverythingASpellchecker(JEditor.this);
-                    //everythingSpellchecker.start(JEditor.this);
-
                     spellchecker.updateAll(JEditor.this.getText());
-
                 }
             });
 
-            //AnalyticASpellchecker analyticSpellchecker = new AnalyticASpellchecker(JEditor.this);
-            //analyticSpellchecker.start(this);
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    int pos = viewToModel2D(e.getPoint());
+
+                    if(e.isControlDown() && SwingUtilities.isLeftMouseButton(e)) {
+
+                        for (Error error : spellchecker.getErrors()) {
+                            if (pos >= error.highlight.getStartOffset() && pos <= error.highlight.getEndOffset())
+                                showSpellcheckErrorPopup(e.getPoint(), error);
+                        }
+
+
+                    }
+                }
+            });
 
 
 
@@ -351,8 +362,48 @@ public class JEditor extends JTextPane {
 
         }
 
+
     }
 
+
+    public void showSpellcheckErrorPopup(Point point, Error error){
+        SwingUtilities.convertPointToScreen(point, JEditor.this);
+
+
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panel.setLayout(new BorderLayout());
+
+        JLabel errorMessage = new JLabel(error.message);
+        panel.add(errorMessage, BorderLayout.CENTER);
+
+        if(error.suggestions != null){
+
+
+            JPanel s = new JPanel();
+            s.setLayout(new BoxLayout(s, BoxLayout.Y_AXIS));
+
+            for(String r : error.suggestions){
+
+                JLabel label = new JLabel(r);
+                label.setForeground(FlatLafUtils.accentColor);
+
+
+                s.add(label);
+            }
+
+
+            panel.add(s, BorderLayout.SOUTH);
+        }
+
+
+
+        Popup popup = Popups.create(JEditor.this, panel, point);
+
+        popupLifetimeManager.register("spellcheckErrorPopup", new PopupContext(popup, panel, popup1 -> {}));
+
+        popup.show();
+    }
 
     public void showNotePopup(Point point, Note note){
         SwingUtilities.convertPointToScreen(point, JEditor.this);

@@ -23,8 +23,8 @@ public class ErrorHighlightPainter implements Highlighter.HighlightPainter {
             Rectangle2D highlight = r1.createUnion(r2);
 
             Graphics2D graphics2D = (Graphics2D) g.create();
-            graphics2D.setStroke(new BasicStroke(1.0f));
-            graphics2D.setColor(Color.RED);
+            graphics2D.setStroke(new BasicStroke(1.3f));
+            graphics2D.setColor(Color.YELLOW);
 
             Rectangle2D bounds = ((Rectangle) shape).getBounds2D();
 
