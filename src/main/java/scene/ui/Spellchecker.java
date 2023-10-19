@@ -105,11 +105,8 @@ public class Spellchecker {
                 Error error = new Error(ruleMatch.getFromPos(), ruleMatch.getToPos(), ruleMatch.getMessage());
                 Element root = jEditor.getDocument().getDefaultRootElement();
 
-                //Error doesn't have a line here!
                 error.line = root.getElementIndex(ruleMatch.getFromPos());
                 error.suggestions = ruleMatch.getSuggestedReplacements();
-                //System.out.println(error.line);
-
 
                 if(!errors.contains(error)){
                     errors.add(error);
@@ -124,24 +121,10 @@ public class Spellchecker {
                     });
 
                 }
-
-
-
-                //Thread.sleep() here?
-
-
-
-
             }
-
-            System.out.println();
-
         }
     }
 
-
-
-    //Soemtimes this clears previous errors that are corrupted for some reason
     private void spellcheckLine(JLanguageTool languageTool, JEditor jEditor) {
 
         Element element = Utils.currentLine(jEditor);
@@ -181,9 +164,10 @@ public class Spellchecker {
                 int end = lineElement.getStartOffset() + match.getToPos();
 
 
-                Error error = new Error(match.getFromPos(), match.getToPos(), match.getMessage());
+                Error error = new Error(start, end, match.getMessage());
                 error.line = line;
                 error.suggestions = match.getSuggestedReplacements();
+
 
 
 
