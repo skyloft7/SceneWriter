@@ -1,17 +1,28 @@
 package scene.markdown;
 
-import org.commonmark.node.*;
 import org.commonmark.parser.Parser;
+import scene.app.Files;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
+import java.io.File;
 
-public class MarkdownLoader {
-    public static void load(String markdown, Document swingDocument) {
+public class MarkdownReader {
+    public static void load(File markdown, Document swingDocument) {
         Parser parser = Parser.builder().build();
-        Node document = parser.parse(markdown);
+
+        try {
+            swingDocument.insertString(swingDocument.getLength(), Files.readText(markdown), new SimpleAttributeSet());
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+
+        return;
+
+
+        /*
+        Node document = parser.parse(Files.readText(markdown));
 
         document.accept(new AbstractVisitor() {
             @Override
@@ -64,6 +75,8 @@ public class MarkdownLoader {
                 visitChildren(text);
             }
         });
+
+         */
 
 
     }
