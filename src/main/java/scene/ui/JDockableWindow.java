@@ -55,27 +55,7 @@ public class JDockableWindow extends JPanel {
 
         header.setLayout(new BorderLayout());
         JLabel titleText = new JLabel(title);
-        titleText.setBorder(new Border() {
-            @Override
-            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-                Graphics2D graphics2D = (Graphics2D) g;
-
-                graphics2D.setStroke(new BasicStroke(5));
-                graphics2D.setColor(FlatLafUtils.accentColor);
-                graphics2D.drawLine(x, height, x + width, height);
-
-            }
-
-            @Override
-            public Insets getBorderInsets(Component c) {
-                return new Insets(3, 3, 3, 3);
-            }
-
-            @Override
-            public boolean isBorderOpaque() {
-                return true;
-            }
-        });
+        titleText.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
 
         header.add(titleText, BorderLayout.WEST);
 
@@ -84,12 +64,16 @@ public class JDockableWindow extends JPanel {
         setBorder(new Border() {
             @Override
             public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+
+                if(isWindowMode()) return;
+
+
                 Graphics2D graphics2D = (Graphics2D) g;
 
 
 
                 graphics2D.setStroke(new BasicStroke(3));
-                graphics2D.setColor(UIManager.getColor("Separator.foreground"));
+                graphics2D.setColor(FlatLafUtils.accentColor);
 
                 int offset = 10;
 
@@ -120,7 +104,7 @@ public class JDockableWindow extends JPanel {
 
             @Override
             public Insets getBorderInsets(Component c) {
-                return new Insets(5, 5, 5, 5);
+                return new Insets(4, 4, 4, 4);
             }
 
             @Override
