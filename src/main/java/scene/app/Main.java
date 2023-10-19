@@ -84,12 +84,15 @@ public class Main {
                     }
                     settings.add(darkMode);
 
-                    JCheckBoxMenuItem zenMode = new JCheckBoxMenuItem("Zen Mode (WIP)");
+                    JCheckBoxMenuItem zenMode = new JCheckBoxMenuItem("Zen Mode");
                     {
 
                         zenMode.addActionListener(e -> {
+
+                            AppManager.setZenMode(zenMode.isSelected());
+
                             GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-                            graphicsDevice.setFullScreenWindow(zenMode.isSelected() ? jFrame : null);
+                            graphicsDevice.setFullScreenWindow(AppManager.isZenMode() ? jFrame : null);
                         });
                     }
                     settings.add(zenMode);

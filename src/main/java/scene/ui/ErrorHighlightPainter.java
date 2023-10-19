@@ -1,5 +1,7 @@
 package scene.ui;
 
+import scene.app.AppManager;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
@@ -24,7 +26,7 @@ public class ErrorHighlightPainter implements Highlighter.HighlightPainter {
 
             Graphics2D graphics2D = (Graphics2D) g.create();
             graphics2D.setStroke(new BasicStroke(1.3f));
-            graphics2D.setColor(Color.YELLOW);
+            graphics2D.setColor(AppManager.isZenMode() ? Color.DARK_GRAY : Color.YELLOW);
 
             Rectangle2D bounds = ((Rectangle) shape).getBounds2D();
 
