@@ -1,24 +1,41 @@
 package scene.app;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class Files {
     public static String readText(File path){
-        String total = "";
+        StringBuilder total = new StringBuilder();
 
         try {
             BufferedReader bufferedReader = new BufferedReader(new java.io.FileReader(path));
 
             String line = "";
             while((line = bufferedReader.readLine()) != null){
-                total += line + "\n";
+
+                total.append(line);
+                total.append("\n");
+                //total.append(System.lineSeparator());
             }
 
-            return total;
+
+
+            return total.toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void saveFile(File path, String text) {
+        System.out.println(Thread.currentThread().getName());
+
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path));
+            bufferedWriter.write(text);
+
+            bufferedWriter.flush();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
