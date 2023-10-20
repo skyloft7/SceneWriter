@@ -32,7 +32,7 @@ public class Spellchecker {
     public void start(JEditor jEditor){
         SwingWorker swingWorker = new SwingWorker() {
             @Override
-            protected Object doInBackground() throws Exception {
+            protected Object doInBackground() {
 
 
                 JLanguageTool languageTool = new JLanguageTool(Languages.getLanguageForShortCode("en-GB"));
@@ -40,48 +40,27 @@ public class Spellchecker {
 
 
                 while(true){
-
-
                     updateAllLock.lock();
 
-
-
                     try {
+
                         if(!info.isEmpty()){
-
                             spellcheckEverything(languageTool, jEditor, jEditor.getText());
-
                             info = "";
                         }
+
+
                     }
-                    finally {
-
-
-                        updateAllLock.unlock();
-                    }
-
+                    finally { updateAllLock.unlock(); }
 
                     spellcheckLine(languageTool, jEditor);
-
-
                 }
-
-
-
-
-                //return null;
             }
         };
-
         swingWorker.execute();
-
-
-
-
     }
 
-    //FIXME: NOT ON EDT!!!!!
-    private List<Error> errors = Collections.synchronizedList(new ArrayList<>());//new ArrayList<>();
+    private List<Error> errors = Collections.synchronizedList(new ArrayList<>());
 
     public Highlighter.HighlightPainter errorHighlighter = new ErrorHighlightPainter();
 
@@ -89,6 +68,8 @@ public class Spellchecker {
     private void spellcheckEverything(JLanguageTool languageTool, JEditor jEditor, String text){
         if(SystemInfo.isWindows)
             text = text.replaceAll("\r\n", "\n");
+
+        errors.clear();
 
 
         List<RuleMatch> m;
@@ -127,6 +108,7 @@ public class Spellchecker {
 
     private void spellcheckLine(JLanguageTool languageTool, JEditor jEditor) {
 
+
         Element element = Utils.currentLine(jEditor);
         String currentLineText = null;
         try {
@@ -135,33 +117,33 @@ public class Spellchecker {
             throw new RuntimeException(e);
         }
 
-        if(SystemInfo.isWindows)
-            currentLineText = currentLineText.replaceAll("\r\n", "\n");
 
 
 
 
-        List<RuleMatch> matches = null;
-        try {
-            matches = languageTool.check(currentLineText);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        List<RuleMatch> matches;
+        //LanguageTool check
+        {
+            try {
+                if(SystemInfo.isWindows)
+                    currentLineText = currentLineText.replaceAll("\r\n", "\n");
+                matches = languageTool.check(currentLineText);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-
-
 
         //Creating Highlights
         {
 
             for (RuleMatch match : matches) {
-                int caretPosition = jEditor.getCaretPosition();
-                Element root = jEditor.getDocument().getDefaultRootElement();
-                int line = root.getElementIndex(caretPosition);
-                Element lineElement = root.getElement(line);
+                int line = jEditor
+                        .getDocument()
+                        .getDefaultRootElement()
+                        .getElementIndex(jEditor.getCaretPosition());
 
-                int start = lineElement.getStartOffset() + match.getFromPos();
-                int end = lineElement.getStartOffset() + match.getToPos();
+                int start = element.getStartOffset() + match.getFromPos();
+                int end = element.getStartOffset() + match.getToPos();
 
 
                 Error error = new Error(start, end, match.getMessage());
@@ -169,9 +151,7 @@ public class Spellchecker {
                 error.suggestions = match.getSuggestedReplacements();
 
 
-
-
-                if(!errors.contains(error)){
+                if (!errors.contains(error)) {
                     errors.add(error);
 
                     SwingUtilities.invokeLater(() -> {
@@ -182,68 +162,111 @@ public class Spellchecker {
                         }
                         jEditor.repaint();
                     });
-
                     try {
-                        //This thread.sleep shouldn't be here because
-                        //We can only dispatch things to the EDT when
-                        //errors don't have them, so we should be doing
-                        //spellchecking as fast as possible
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-
                 }
+
 
             }
         }
 
 
-
-        //Removing stale Highlights
+        //Remove stale highlights
         {
+
+            int caretPosition = jEditor.getCaretPosition();
+            Element root = jEditor.getDocument().getDefaultRootElement();
+            int lineNum = root.getElementIndex(caretPosition);
 
 
             for (Iterator<Error> iterator = errors.iterator(); iterator.hasNext(); ) {
                 Error error = iterator.next();
+                if (error.line == lineNum) {
+                    boolean matchFound = false;
 
-                int caretPosition = jEditor.getCaretPosition();
-                Element root = jEditor.getDocument().getDefaultRootElement();
+                    for (RuleMatch match : matches) {
+                        int startOffset = element.getStartOffset() + match.getFromPos();
+                        int endOffset = element.getStartOffset() + match.getToPos();
 
-                int line = root.getElementIndex(caretPosition);
+                        if (startOffset == error.getStartOffset() && endOffset == error.getEndOffset()) {
+                            matchFound = true;
+                            break;
+                        }
+                    }
+
+
+                    if (!matchFound) {
+                        SwingUtilities.invokeLater(() -> {
+                            jEditor.getHighlighter().removeHighlight(error.highlight);
+                            jEditor.repaint();
+                        });
+
+                        iterator.remove();
+                    }
 
 
 
-                //Leave errors from other lines intact, this doesn't do much
-                //to stop invalidating errors that are on the same "line"
-                if(line != error.line) continue;
-
-
-                if(!matchError(matches, error, element)){
-                    SwingUtilities.invokeLater(() -> {
-                        jEditor.getHighlighter().removeHighlight(error.highlight);
-                        jEditor.repaint();
-                    });
-                    iterator.remove();
                 }
-
             }
-
-
-        }
-    }
-
-    private boolean matchError(List<RuleMatch> r, Error error, Element element){
-        for(RuleMatch m : r){
-
-            int start = element.getStartOffset() + m.getFromPos();
-            int end = element.getStartOffset() + m.getToPos();
-
-            if(start == error.highlight.getStartOffset() && end == error.highlight.getEndOffset()) return true;
-
         }
 
-        return false;
+        //Let the UI stuff sync up, so we grab the latest UI
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
+
+
+        /*
+        {
+
+
+
+
+
+            //Removing stale Highlights
+            {
+
+
+                for (Iterator<Error> iterator = errors.iterator(); iterator.hasNext(); ) {
+                    Error error = iterator.next();
+
+                    int caretPosition = jEditor.getCaretPosition();
+                    Element root = jEditor.getDocument().getDefaultRootElement();
+
+                    int line = root.getElementIndex(caretPosition);
+
+
+                    //Leave errors from other lines intact, this doesn't do much
+                    //to stop invalidating errors that are on the same "line"
+                    if (line != error.line) continue;
+
+
+                    if (!isValidError(matches, error, element)) {
+
+                        SwingUtilities.invokeLater(() -> {
+                            jEditor.getHighlighter().removeHighlight(error.highlight);
+                            jEditor.repaint();
+                        });
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+
+
+
+         */
+
+
     }
 
     public void updateAll(String entireText){
