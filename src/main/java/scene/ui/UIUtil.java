@@ -1,13 +1,9 @@
-package thirdparty;
-
-import scene.ui.JDockableWindow;
-import scene.ui.JDockspace;
+package scene.ui;
 
 import javax.swing.*;
 import javax.swing.text.Element;
 
-public class Utils {
-
+public class UIUtil {
 
     public static Element currentLine(JTextPane j){
         Element root = j.getDocument().getDefaultRootElement();
@@ -27,10 +23,4 @@ public class Utils {
             if(window.getWindow() != null) SwingUtilities.updateComponentTreeUI(window.getWindow());
         }
     }
-
-
-
-
-
-
 }

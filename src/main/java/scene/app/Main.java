@@ -7,7 +7,7 @@ import flatlaf.FlatLafUtils;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
 import scene.ui.MenuAdapter;
-import thirdparty.Utils;
+import scene.ui.UIUtil;
 
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -77,7 +77,7 @@ public class Main {
                             if (darkMode.isSelected()) FlatGradiantoDeepOceanIJTheme.setup();
                             else FlatLightLaf.setup();
 
-                            Utils.updateComponentTreeUI(jFrame);
+                            UIUtil.updateComponentTreeUI(jFrame);
                             jFrame.repaint();
                         });
 

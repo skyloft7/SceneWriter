@@ -5,7 +5,6 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
 import org.languagetool.rules.RuleMatch;
 import scene.app.Error;
-import thirdparty.Utils;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -113,7 +112,7 @@ public class Spellchecker {
     private void spellcheckLine(JLanguageTool languageTool, JEditor jEditor) {
 
 
-        Element element = Utils.currentLine(jEditor);
+        Element element = UIUtil.currentLine(jEditor);
         String currentLineText = null;
         try {
             currentLineText = jEditor.getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
