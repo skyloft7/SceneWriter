@@ -3,7 +3,7 @@ package scene.app;
 import javax.swing.text.Highlighter;
 import java.util.List;
 
-public class Error {
+public class SpellingError {
     private final int startOffsetDoc;
     private final int endOffsetDoc;
     public String message;
@@ -12,7 +12,7 @@ public class Error {
     public List<String> suggestions;
 
 
-    public Error(int startOffsetDoc, int endOffsetDoc, String message){
+    public SpellingError(int startOffsetDoc, int endOffsetDoc, String message){
         this.startOffsetDoc = startOffsetDoc;
         this.endOffsetDoc = endOffsetDoc;
         this.message = message;
@@ -29,8 +29,8 @@ public class Error {
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof Error)) return false;
-        Error error = (Error) obj;
-        return (error.getStartOffset() == getStartOffset() && error.getEndOffset() == getEndOffset());
+        if(!(obj instanceof SpellingError)) return false;
+        SpellingError spellingError = (SpellingError) obj;
+        return (spellingError.getStartOffset() == getStartOffset() && spellingError.getEndOffset() == getEndOffset());
     }
 }

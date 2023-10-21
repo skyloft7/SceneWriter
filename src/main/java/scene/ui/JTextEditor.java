@@ -2,7 +2,7 @@ package scene.ui;
 
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import flatlaf.FlatLafUtils;
-import scene.app.Error;
+import scene.app.SpellingError;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -15,7 +15,7 @@ import java.util.Iterator;
 
 import static java.awt.event.KeyEvent.*;
 
-public class JEditor extends JTextPane {
+public class JTextEditor extends JTextPane {
 
     private UndoManager manager = new UndoManager();
     private ArrayList<Note> notes = new ArrayList<>();
@@ -27,9 +27,9 @@ public class JEditor extends JTextPane {
     private Spellchecker spellchecker = new Spellchecker();
 
 
-    public JEditor() {
+    public JTextEditor() {
         super();
-        setStyledDocument(new EditorDocument());
+        setStyledDocument(new TextDocument());
         getStyledDocument().addUndoableEditListener(manager);
         popupLifetimeManager.install(this);
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
@@ -139,7 +139,7 @@ public class JEditor extends JTextPane {
                         if (jPopupMenu.getComponents().length == 0)
                             jPopupMenu.add(new JLabel("Nothing to do!"));
 
-                        jPopupMenu.show(JEditor.this, e.getX(), e.getY());
+                        jPopupMenu.show(JTextEditor.this, e.getX(), e.getY());
                     }
 
 
@@ -193,7 +193,7 @@ public class JEditor extends JTextPane {
 
 
                     if(selectingText) {
-                        ((EditorDocument) getStyledDocument()).lockWriter();
+                        ((TextDocument) getStyledDocument()).lockWriter();
 
 
                         /*
@@ -250,7 +250,7 @@ public class JEditor extends JTextPane {
                             if(selectingText){
                                 int selectionLength = getSelectionEnd() - getSelectionStart();
                                 getStyledDocument().setCharacterAttributes(getSelectionStart(), selectionLength, currentAttributes, false);
-                                ((EditorDocument) getStyledDocument()).unlockWriter();
+                                ((TextDocument) getStyledDocument()).unlockWriter();
 
                             }
                         }
@@ -331,7 +331,7 @@ public class JEditor extends JTextPane {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     pasteAction.actionPerformed(e);
-                    spellchecker.updateAll(JEditor.this.getText());
+                    spellchecker.updateAll(JTextEditor.this.getText());
                 }
             });
 
@@ -342,9 +342,9 @@ public class JEditor extends JTextPane {
 
                     if(e.isControlDown() && SwingUtilities.isLeftMouseButton(e)) {
 
-                        for (Error error : spellchecker.getErrors()) {
-                            if (pos >= error.highlight.getStartOffset() && pos <= error.highlight.getEndOffset())
-                                showSpellcheckErrorPopup(e.getPoint(), error);
+                        for (SpellingError spellingError : spellchecker.getErrors()) {
+                            if (pos >= spellingError.highlight.getStartOffset() && pos <= spellingError.highlight.getEndOffset())
+                                showSpellcheckErrorPopup(e.getPoint(), spellingError);
                         }
 
 
@@ -370,9 +370,9 @@ public class JEditor extends JTextPane {
         super.updateUI();
 
         if(spellchecker != null) {
-            for (Error error : spellchecker.getErrors()) {
+            for (SpellingError spellingError : spellchecker.getErrors()) {
                 try {
-                    error.highlight = (Highlighter.Highlight) getHighlighter().addHighlight(error.getStartOffset(), error.getEndOffset(), error.highlight.getPainter());
+                    spellingError.highlight = (Highlighter.Highlight) getHighlighter().addHighlight(spellingError.getStartOffset(), spellingError.getEndOffset(), spellingError.highlight.getPainter());
                 } catch (BadLocationException ignored) {}
             }
         }
@@ -392,24 +392,24 @@ public class JEditor extends JTextPane {
 
     }
 
-    public void showSpellcheckErrorPopup(Point point, Error error){
-        SwingUtilities.convertPointToScreen(point, JEditor.this);
+    public void showSpellcheckErrorPopup(Point point, SpellingError spellingError){
+        SwingUtilities.convertPointToScreen(point, JTextEditor.this);
 
 
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panel.setLayout(new BorderLayout());
 
-        JLabel errorMessage = new JLabel(error.message);
+        JLabel errorMessage = new JLabel(spellingError.message);
         panel.add(errorMessage, BorderLayout.CENTER);
 
-        if(error.suggestions != null){
+        if(spellingError.suggestions != null){
 
 
             JPanel s = new JPanel();
             s.setLayout(new BoxLayout(s, BoxLayout.Y_AXIS));
 
-            for(String r : error.suggestions){
+            for(String r : spellingError.suggestions){
 
                 JLabel label = new JLabel(r);
                 label.setForeground(FlatLafUtils.accentColor);
@@ -424,7 +424,7 @@ public class JEditor extends JTextPane {
 
 
 
-        Popup popup = Popups.create(JEditor.this, panel, point);
+        Popup popup = Popups.create(JTextEditor.this, panel, point);
 
         popupLifetimeManager.register("spellcheckErrorPopup", new PopupContext(popup, panel, popup1 -> {}));
 
@@ -432,7 +432,7 @@ public class JEditor extends JTextPane {
     }
 
     public void showNotePopup(Point point, Note note){
-        SwingUtilities.convertPointToScreen(point, JEditor.this);
+        SwingUtilities.convertPointToScreen(point, JTextEditor.this);
         JTextField noteText = new JTextField(note.text);
         JButton remove = new JButton(new FlatTabbedPaneCloseIcon());
         remove.setContentAreaFilled(false);
@@ -447,7 +447,7 @@ public class JEditor extends JTextPane {
         panel.add(noteText, BorderLayout.CENTER);
         panel.add(remove, BorderLayout.EAST);
 
-        Popup popup = Popups.create(JEditor.this, panel, point);
+        Popup popup = Popups.create(JTextEditor.this, panel, point);
 
 
         remove.addActionListener(e1 -> {

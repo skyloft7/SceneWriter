@@ -5,8 +5,8 @@ import scene.markdown.MarkdownReader;
 import scene.markdown.MarkdownWriter;
 import scene.ui.DocumentAdapter;
 import scene.ui.FileChoosers;
-import scene.ui.JEditor;
-import scene.ui.JEditorScrollPane;
+import scene.ui.JTextEditor;
+import scene.ui.JTextEditorScrollPane;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -15,7 +15,7 @@ import java.io.File;
 
 public class EditorPanel extends Workspace {
 
-    private JEditor jEditor = new JEditor();
+    private JTextEditor textEditor = new JTextEditor();
     public EditorPanel() {
         super("Source");
         Workspaces.connect(this);
@@ -30,7 +30,7 @@ public class EditorPanel extends Workspace {
 
                 if(file != null){
                     SceneManager.setFile(file);
-                    MarkdownReader.load(file, jEditor.getDocument());
+                    MarkdownReader.load(file, textEditor.getDocument());
                 }
 
 
@@ -41,7 +41,7 @@ public class EditorPanel extends Workspace {
 
         timer.setRepeats(false);
 
-        jEditor.getDocument().addDocumentListener(new DocumentAdapter(){
+        textEditor.getDocument().addDocumentListener(new DocumentAdapter(){
             @Override
             public void textUpdated(DocumentEvent e) {
                 super.textUpdated(e);
@@ -61,9 +61,9 @@ public class EditorPanel extends Workspace {
                 //There is a file already opened
                 if(SceneManager.getFile() != null){
 
-                    System.out.println("Windows Line Ending: " + jEditor.getText().contains("\r"));
+                    System.out.println("Windows Line Ending: " + textEditor.getText().contains("\r"));
 
-                    MarkdownWriter.write(SceneManager.getFile(), jEditor.getText());
+                    MarkdownWriter.write(SceneManager.getFile(), textEditor.getText());
                 }
 
                 //The user just opened Scene and started typing like
@@ -80,8 +80,8 @@ public class EditorPanel extends Workspace {
 
 
 
-        add(new JEditorScrollPane(
-                jEditor,
+        add(new JTextEditorScrollPane(
+                        textEditor,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
             BorderLayout.CENTER

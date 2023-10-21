@@ -2,9 +2,9 @@ package scene.ui;
 
 import javax.swing.text.DefaultStyledDocument;
 
-public class EditorDocument extends DefaultStyledDocument {
+public class TextDocument extends DefaultStyledDocument {
 
-    public EditorDocument(){
+    public TextDocument(){
         super();
     }
 

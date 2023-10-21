@@ -8,19 +8,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
-public class JEditorScrollPane extends JScrollPane {
+public class JTextEditorScrollPane extends JScrollPane {
 
     private PopupFactory popupFactory = new PopupFactory();
     private Popup popup = null;
     private JLabel previewComponent = new JLabel();
 
     private PreviewImage previewImage;
-    private JEditor editor;
+    private JTextEditor editor;
 
-    public JEditorScrollPane(JEditor jEditor, int vsbPolicy, int hsbPolicy) {
-        super(jEditor, vsbPolicy, hsbPolicy);
-        this.editor = jEditor;
-        this.previewImage = new PreviewImage(jEditor);
+    public JTextEditorScrollPane(JTextEditor textEditor, int vsbPolicy, int hsbPolicy) {
+        super(textEditor, vsbPolicy, hsbPolicy);
+        this.editor = textEditor;
+        this.previewImage = new PreviewImage(textEditor);
 
         previewComponent.setIcon(this.previewImage);
         previewComponent.setBorder(new FlatRoundBorder());
@@ -36,11 +36,11 @@ public class JEditorScrollPane extends JScrollPane {
 
 
                 Point p = new Point(0, 0);
-                SwingUtilities.convertPointToScreen(p, JEditorScrollPane.this);
+                SwingUtilities.convertPointToScreen(p, JTextEditorScrollPane.this);
 
                 previewImage.setPosition(e.getY());
                 previewComponent.repaint();
-                popup = popupFactory.getPopup(JEditorScrollPane.this, previewComponent, p.x, p.y);
+                popup = popupFactory.getPopup(JTextEditorScrollPane.this, previewComponent, p.x, p.y);
                 popup.show();
 
             }
