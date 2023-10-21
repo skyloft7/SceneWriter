@@ -106,6 +106,10 @@ public class Spellchecker {
         }
     }
 
+    /*
+    Lots of race conditions here and assumptions that just explode because data is fetched,
+    the thread is suspended, the data is changed, and now the copy of the data is invalidated
+     */
     private void spellcheckLine(JLanguageTool languageTool, JEditor jEditor) {
 
 
@@ -132,6 +136,7 @@ public class Spellchecker {
                 throw new RuntimeException(e);
             }
         }
+
 
         //Creating Highlights
         {
@@ -177,6 +182,8 @@ public class Spellchecker {
         //Remove stale highlights
         {
 
+
+
             int caretPosition = jEditor.getCaretPosition();
             Element root = jEditor.getDocument().getDefaultRootElement();
             int lineNum = root.getElementIndex(caretPosition);
@@ -219,54 +226,6 @@ public class Spellchecker {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-
-
-
-
-
-        /*
-        {
-
-
-
-
-
-            //Removing stale Highlights
-            {
-
-
-                for (Iterator<Error> iterator = errors.iterator(); iterator.hasNext(); ) {
-                    Error error = iterator.next();
-
-                    int caretPosition = jEditor.getCaretPosition();
-                    Element root = jEditor.getDocument().getDefaultRootElement();
-
-                    int line = root.getElementIndex(caretPosition);
-
-
-                    //Leave errors from other lines intact, this doesn't do much
-                    //to stop invalidating errors that are on the same "line"
-                    if (line != error.line) continue;
-
-
-                    if (!isValidError(matches, error, element)) {
-
-                        SwingUtilities.invokeLater(() -> {
-                            jEditor.getHighlighter().removeHighlight(error.highlight);
-                            jEditor.repaint();
-                        });
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-
-
-
-         */
-
-
     }
 
     public void updateAll(String entireText){
