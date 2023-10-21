@@ -4,14 +4,16 @@ import flatlaf.FlatLafUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class JDockspace extends JPanel {
     private boolean showOverlay;
     private int dockDistance = 50;
-
     private Map<String, JDockableWindow> windows = new HashMap();
+
+    private static ArrayList<JDockableWindow> allFloatingWindows = new ArrayList<>();
 
     public JDockspace() {
         setLayout(new BorderLayout());
@@ -98,5 +100,9 @@ public class JDockspace extends JPanel {
 
     public Map<String, JDockableWindow> getWindows() {
         return windows;
+    }
+
+    public static ArrayList<JDockableWindow> getAllFloatingWindows() {
+        return allFloatingWindows;
     }
 }

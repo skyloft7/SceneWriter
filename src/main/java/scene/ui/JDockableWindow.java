@@ -18,6 +18,8 @@ public class JDockableWindow extends JPanel {
     private int amnestySize = 50;
     private String title;
 
+    private JDialog window;
+
     private boolean windowMode;
 
     public JDockableWindow(String title){
@@ -188,8 +190,9 @@ public class JDockableWindow extends JPanel {
                 else {
 
                     if(!windowMode) {
-                        JDialog jDialog = new JDialog((Window) null);
-                        jDialog.setTitle(title);
+                        window = new JDialog((Window) null);
+
+                        window.setTitle(title);
 
 
                         parent.remove(JDockableWindow.this);
@@ -199,9 +202,9 @@ public class JDockableWindow extends JPanel {
 
 
                         windowPreferredSize = getPreferredSize();
-                        jDialog.setSize(windowPreferredSize);
+                        window.setSize(windowPreferredSize);
 
-                        jDialog.addComponentListener(new ComponentAdapter() {
+                        window.addComponentListener(new ComponentAdapter() {
                             @Override
                             public void componentResized(ComponentEvent e) {
                                 windowPreferredSize = e.getComponent().getSize();
@@ -210,18 +213,18 @@ public class JDockableWindow extends JPanel {
 
                         Dimension oldSize = getPreferredSize();
 
-                        jDialog.setLayout(new BorderLayout());
-                        jDialog.add(JDockableWindow.this);
-                        jDialog.setVisible(true);
+                        window.setLayout(new BorderLayout());
+                        window.add(JDockableWindow.this);
+                        window.setVisible(true);
+                        window.setLocation(MouseInfo.getPointerInfo().getLocation());
 
-                        jDialog.setLocation(MouseInfo.getPointerInfo().getLocation());
+                        JDockspace.getAllFloatingWindows().add(JDockableWindow.this);
 
 
-
-                        jDialog.addWindowListener(new WindowAdapter() {
+                        window.addWindowListener(new WindowAdapter() {
                             @Override
                             public void windowClosing(WindowEvent e) {
-                                JDockableWindow.this.setPreferredSize(jDialog.getSize());
+                                JDockableWindow.this.setPreferredSize(window.getSize());
 
                                 componentResizer.registerComponent(JDockableWindow.this, resizeAxis -> {
                                     if(resizeAxis == ResizeListener.ResizeAxis.HORIZONTAL){
@@ -238,6 +241,8 @@ public class JDockableWindow extends JPanel {
                                 parent.repaint();
 
                                 windowMode = false;
+
+                                JDockspace.getAllFloatingWindows().remove(JDockableWindow.this);
                             }
                         });
 
@@ -338,5 +343,9 @@ public class JDockableWindow extends JPanel {
 
     public String getTitle() {
         return title;
+    }
+
+    public JDialog getWindow() {
+        return window;
     }
 }
