@@ -98,7 +98,7 @@ public class JEditor extends JTextPane {
                                         showNotePopup(e.getPoint(), note);
 
                                         try {
-                                            getHighlighter().addHighlight(note.startOffset, note.endOffset, noteHighlighter);
+                                            note.highlight = (Highlighter.Highlight) getHighlighter().addHighlight(note.getStartOffset(), note.getEndOffset(), noteHighlighter);
                                         } catch (BadLocationException ex) {
                                             throw new RuntimeException(ex);
                                         }
@@ -115,14 +115,14 @@ public class JEditor extends JTextPane {
                             for (Note note : notes) {
                                 JMenuItem m = new JMenuItem(note.text);
                                 try {
-                                    m.setToolTipText("<html><p style='font-style:italic;color:gray;'>" + getText(note.startOffset, note.endOffset - note.startOffset) + "</p></html>");
+                                    m.setToolTipText("<html><p style='font-style:italic;color:gray;'>" + getText(note.getStartOffset(), note.getEndOffset() - note.getStartOffset()) + "</p></html>");
                                 } catch (BadLocationException ex) {
                                     throw new RuntimeException(ex);
                                 }
 
                                 m.addActionListener(e1 -> {
                                     try {
-                                        scrollRectToVisible(modelToView2D(note.startOffset).getBounds());
+                                        scrollRectToVisible(modelToView2D(note.getStartOffset()).getBounds());
                                     } catch (BadLocationException ex) {
                                         throw new RuntimeException(ex);
                                     }
@@ -149,7 +149,7 @@ public class JEditor extends JTextPane {
 
                         for (Iterator<Note> iterator = notes.iterator(); iterator.hasNext(); ) {
                             Note note = iterator.next();
-                            if (offset >= note.startOffset && offset <= note.endOffset) {
+                            if (offset >= note.getStartOffset() && offset <= note.getEndOffset()) {
                                 Point point = e.getPoint();
 
                                 showNotePopup(point, note);
@@ -365,6 +365,32 @@ public class JEditor extends JTextPane {
 
     }
 
+    @Override
+    public void updateUI() {
+        super.updateUI();
+
+        if(spellchecker != null) {
+            for (Error error : spellchecker.getErrors()) {
+                try {
+                    error.highlight = (Highlighter.Highlight) getHighlighter().addHighlight(error.getStartOffset(), error.getEndOffset(), error.highlight.getPainter());
+                } catch (BadLocationException ignored) {}
+            }
+        }
+
+        if(notes != null) {
+            for (Note note : notes) {
+                try {
+                    note.highlight = (Highlighter.Highlight) getHighlighter().addHighlight(note.getStartOffset(), note.getEndOffset(), note.highlight.getPainter());
+                } catch (BadLocationException ignored) {
+                }
+
+            }
+        }
+
+
+
+
+    }
 
     public void showSpellcheckErrorPopup(Point point, Error error){
         SwingUtilities.convertPointToScreen(point, JEditor.this);
@@ -431,7 +457,7 @@ public class JEditor extends JTextPane {
 
             //Remove the Highlight
             for(Highlighter.Highlight highlight : getHighlighter().getHighlights()) {
-                if(highlight.getStartOffset() == note.startOffset && highlight.getEndOffset() == note.endOffset){
+                if(highlight.getStartOffset() == note.getStartOffset() && highlight.getEndOffset() == note.getEndOffset()){
                     getHighlighter().removeHighlight(highlight);
                 }
 
