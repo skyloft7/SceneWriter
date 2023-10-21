@@ -27,7 +27,7 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
 
-            UILayoutSerializer uiLayoutSerializer = new UILayoutSerializer();
+            Serializer serializer = new Serializer();
 
 
 
@@ -90,10 +90,10 @@ public class Main {
 
                         zenMode.addActionListener(e -> {
 
-                            AppManager.setZenMode(zenMode.isSelected());
+                            SceneManager.setZenMode(zenMode.isSelected());
 
                             GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-                            graphicsDevice.setFullScreenWindow(AppManager.isZenMode() ? jFrame : null);
+                            graphicsDevice.setFullScreenWindow(SceneManager.isZenMode() ? jFrame : null);
                         });
                     }
                     settings.add(zenMode);
@@ -126,14 +126,14 @@ public class Main {
             jFrame.add(jDockspace);
 
 
-            uiLayoutSerializer.restore(jDockspace);
+            serializer.restore(jDockspace);
 
 
 
             jFrame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    uiLayoutSerializer.save(jDockspace);
+                    serializer.save(jDockspace);
                 }
             });
 

@@ -29,7 +29,7 @@ public class EditorPanel extends Workspace {
                 File file = FileChoosers.showOpenDialog(MarkdownFileFilter.filter);
 
                 if(file != null){
-                    AppManager.setFile(file);
+                    SceneManager.setFile(file);
                     MarkdownReader.load(file, jEditor.getDocument());
                 }
 
@@ -59,11 +59,11 @@ public class EditorPanel extends Workspace {
             @Override
             public void save() {
                 //There is a file already opened
-                if(AppManager.getFile() != null){
+                if(SceneManager.getFile() != null){
 
                     System.out.println("Windows Line Ending: " + jEditor.getText().contains("\r"));
 
-                    MarkdownWriter.write(AppManager.getFile(), jEditor.getText());
+                    MarkdownWriter.write(SceneManager.getFile(), jEditor.getText());
                 }
 
                 //The user just opened Scene and started typing like

@@ -12,7 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-public class UILayoutSerializer {
+public class Serializer {
 
     public void save(JDockspace jDockspace){
         //TODO: Move this to EDT
@@ -103,8 +103,6 @@ public class UILayoutSerializer {
 
         }
     }
-
-
 
 
 
