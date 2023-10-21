@@ -4,7 +4,6 @@ import scene.markdown.MarkdownFileFilter;
 import scene.markdown.MarkdownReader;
 import scene.markdown.MarkdownWriter;
 import scene.ui.DocumentAdapter;
-import scene.ui.FileChoosers;
 import scene.ui.JTextEditor;
 import scene.ui.JTextEditorScrollPane;
 

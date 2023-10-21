@@ -2,6 +2,9 @@ package scene.ui;
 
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import flatlaf.FlatLafUtils;
+import scene.app.PopupContext;
+import scene.app.PopupLifetimeManager;
+import scene.app.Popups;
 import scene.app.SpellingError;
 
 import javax.swing.*;

@@ -1,4 +1,4 @@
-package scene.ui;
+package scene.app;
 
 import javax.swing.*;
 import java.awt.*;

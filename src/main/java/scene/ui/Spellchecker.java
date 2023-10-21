@@ -61,7 +61,7 @@ public class Spellchecker {
 
     private List<SpellingError> spellingErrors = Collections.synchronizedList(new ArrayList<>());
 
-    public Highlighter.HighlightPainter errorHighlighter = new ErrorHighlightPainter();
+    public Highlighter.HighlightPainter errorHighlighter = new SpellingErrorHighlightPainter();
 
 
     private void spellcheckEverything(JLanguageTool languageTool, JTextEditor textEditor, String text){

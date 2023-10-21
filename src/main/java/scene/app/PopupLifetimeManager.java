@@ -1,4 +1,6 @@
-package scene.ui;
+package scene.app;
+
+import scene.app.PopupContext;
 
 import javax.swing.*;
 import java.awt.*;

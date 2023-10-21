@@ -8,9 +8,9 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-public class ErrorHighlightPainter implements Highlighter.HighlightPainter {
+public class SpellingErrorHighlightPainter implements Highlighter.HighlightPainter {
 
-    public ErrorHighlightPainter() {
+    public SpellingErrorHighlightPainter() {
 
     }
 
