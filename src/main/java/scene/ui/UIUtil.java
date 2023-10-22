@@ -1,17 +1,19 @@
 package scene.ui;
 
 import javax.swing.*;
+import javax.swing.text.Caret;
 import javax.swing.text.Element;
 
 public class UIUtil {
 
     public static Element currentLine(JTextPane j){
         Element root = j.getDocument().getDefaultRootElement();
-        int caret = j.getCaretPosition();
+
+        Caret caret = j.getCaret();
 
         for (int i = 0; i < root.getElementCount(); i++) {
             Element e = root.getElement(i);
-            if(caret >= e.getStartOffset() && caret <= e.getEndOffset()) return e;
+            if(caret.getDot() >= e.getStartOffset() && caret.getDot() <= e.getEndOffset()) return e;
         }
         return null;
     }

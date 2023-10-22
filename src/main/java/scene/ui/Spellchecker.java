@@ -105,33 +105,23 @@ public class Spellchecker {
         }
     }
 
-    /*
-    Lots of race conditions here and assumptions that just explode because data is fetched,
-    the thread is suspended, the data is changed, and now the copy of the data is invalidated
-     */
     private void spellcheckLine(JLanguageTool languageTool, JTextEditor textEditor) {
 
-
         Element element = UIUtil.currentLine(textEditor);
-        String currentLineText = null;
-        try {
-            currentLineText = textEditor.getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
-        } catch (BadLocationException e) {
-            throw new RuntimeException(e);
-        }
-
-
-
-
-
+        String currentLineText;
         List<RuleMatch> matches;
+
+
+
+
         //LanguageTool check
         {
             try {
+                currentLineText = textEditor.getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
                 if(SystemInfo.isWindows)
                     currentLineText = currentLineText.replaceAll("\r\n", "\n");
                 matches = languageTool.check(currentLineText);
-            } catch (IOException e) {
+            } catch (IOException | BadLocationException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -166,11 +156,8 @@ public class Spellchecker {
                         }
                         textEditor.repaint();
                     });
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+
+                    System.out.println("New Error");
                 }
 
 
@@ -182,29 +169,17 @@ public class Spellchecker {
         {
 
 
+            if(matches.isEmpty()) return;
 
-            int caretPosition = textEditor.getCaretPosition();
+
+
             Element root = textEditor.getDocument().getDefaultRootElement();
-            int lineNum = root.getElementIndex(caretPosition);
-
 
             for (Iterator<SpellingError> iterator = spellingErrors.iterator(); iterator.hasNext(); ) {
                 SpellingError spellingError = iterator.next();
-                if (spellingError.line == lineNum) {
-                    boolean matchFound = false;
+                if (spellingError.line == root.getElementIndex(textEditor.getCaretPosition())) {
 
-                    for (RuleMatch match : matches) {
-                        int startOffset = element.getStartOffset() + match.getFromPos();
-                        int endOffset = element.getStartOffset() + match.getToPos();
-
-                        if (startOffset == spellingError.getStartOffset() && endOffset == spellingError.getEndOffset()) {
-                            matchFound = true;
-                            break;
-                        }
-                    }
-
-
-                    if (!matchFound) {
+                    if (!isValidError(spellingError, matches, element)) {
                         SwingUtilities.invokeLater(() -> {
                             textEditor.getHighlighter().removeHighlight(spellingError.highlight);
                             textEditor.repaint();
@@ -217,14 +192,27 @@ public class Spellchecker {
 
                 }
             }
+
+
+
+
+
+
+
+        }
+    }
+
+    private boolean isValidError(SpellingError spellingError, List<RuleMatch> matches, Element element){
+        for (RuleMatch match : matches) {
+            int startOffset = element.getStartOffset() + match.getFromPos();
+            int endOffset = element.getStartOffset() + match.getToPos();
+
+            if (startOffset == spellingError.getStartOffset() && endOffset == spellingError.getEndOffset()) {
+                return true;
+            }
         }
 
-        //Let the UI stuff sync up, so we grab the latest UI
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return false;
     }
 
     public void updateAll(String entireText){
