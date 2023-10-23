@@ -3,23 +3,43 @@ package scene.markdown;
 import org.commonmark.parser.Parser;
 import scene.app.Files;
 
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 
 public class MarkdownReader {
     public static void load(File markdown, Document swingDocument) {
+
+        SwingWorker<String, Nothing> swingWorker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() {
+                return Files.readText(markdown);
+            }
+            @Override
+            protected void done() {
+                super.done();
+
+                try {
+                    swingDocument.insertString(swingDocument.getLength(), get(), new SimpleAttributeSet());
+                } catch (BadLocationException | InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            }
+        };
+        swingWorker.execute();
+
+
+
+
+
+
+
         Parser parser = Parser.builder().build();
-
-        try {
-            swingDocument.insertString(swingDocument.getLength(), Files.readText(markdown), new SimpleAttributeSet());
-        } catch (BadLocationException e) {
-            throw new RuntimeException(e);
-        }
-
-        return;
-
 
         /*
         Node document = parser.parse(Files.readText(markdown));

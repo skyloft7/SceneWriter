@@ -29,9 +29,11 @@ public class EditorPanel extends Workspace {
         addSignal(new OpenFileSignal(){
             @Override
             public void open() {
+                open(FileChoosers.showOpenDialog(MarkdownFileFilter.filter));
+            }
 
-                File file = FileChoosers.showOpenDialog(MarkdownFileFilter.filter);
-
+            @Override
+            public void open(File file) {
                 if(file != null){
                     SceneManager.setFile(file);
                     MarkdownReader.load(file, textEditor.getDocument());
@@ -102,6 +104,8 @@ public class EditorPanel extends Workspace {
 
     public static class OpenFileSignal implements WorkspaceSignal {
         public void open(){}
+
+        public void open(File file){}
     }
 
     public static class SaveFileSignal implements WorkspaceSignal {

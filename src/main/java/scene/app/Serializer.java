@@ -10,6 +10,7 @@ import scene.ui.JDockspace;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 
 public class Serializer {
@@ -32,9 +33,11 @@ public class Serializer {
                 windowPrefs.set("DockPosition", jDockableWindow.getDockPos());
                 windowPrefs.set("Width", jDockableWindow.getSize().width);
                 windowPrefs.set("Height", jDockableWindow.getSize().height);
-
             }
 
+            ConfigurationSection projectInfo = preferencesFile.createSection("Files");
+            projectInfo.set("Project", SceneManager.getFile().getAbsolutePath());
+            projectInfo.set("FilePath", FileChoosers.getCurrentPath().getAbsolutePath());
 
 
 
@@ -63,15 +66,8 @@ public class Serializer {
             boolean darkMode = preferencesFile.getBoolean("DarkMode");
             {
 
-
-                if (darkMode) {
-                    System.out.println("Dark mode is best mode");
-                    FlatGradiantoDeepOceanIJTheme.setup();
-                } else {
-                    FlatLightLaf.setup();
-                }
-
-
+                if (darkMode) FlatGradiantoDeepOceanIJTheme.setup();
+                else FlatLightLaf.setup();
 
                 Window window = SwingUtilities.getWindowAncestor(jDockspace);
                 SwingUtilities.updateComponentTreeUI(window);
@@ -97,6 +93,19 @@ public class Serializer {
 
 
             }
+
+            ConfigurationSection projectInfo = preferencesFile.getConfigurationSection("Files");
+            File projectFile = new File(projectInfo.getString("Project"));
+
+            System.out.println(projectFile);
+
+            if(projectFile.exists()) {
+                SceneManager.setFile(projectFile);
+                Workspaces.get("Source").getSignal(EditorPanel.OpenFileSignal.class).open(projectFile);
+            }
+
+            File currentPath = new File(projectInfo.getString("FilePath"));
+            if(currentPath.exists()) FileChoosers.setCurrentPath(currentPath);
 
 
 

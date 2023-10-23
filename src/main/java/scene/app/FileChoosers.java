@@ -43,4 +43,12 @@ public class FileChoosers {
 
         return null;
     }
+
+    public static File getCurrentPath() {
+        return currentPath;
+    }
+
+    public static void setCurrentPath(File currentPath) {
+        FileChoosers.currentPath = currentPath;
+    }
 }

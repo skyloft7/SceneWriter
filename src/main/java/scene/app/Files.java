@@ -14,7 +14,6 @@ public class Files {
 
                 total.append(line);
                 total.append("\n");
-                //total.append(System.lineSeparator());
             }
 
 

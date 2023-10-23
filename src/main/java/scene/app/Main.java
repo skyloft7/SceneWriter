@@ -48,6 +48,7 @@ public class Main {
 
 
             JFrame jFrame = new JFrame("Scene");
+            SceneManager.setFrame(jFrame);
 
 
 
@@ -137,7 +138,7 @@ public class Main {
                 }
             });
 
-            SceneManager.setFrame(jFrame);
+
 
 
 
