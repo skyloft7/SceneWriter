@@ -1,5 +1,6 @@
 package scene.app;
 
+import com.formdev.flatlaf.icons.FlatFileViewFileIcon;
 import scene.markdown.MarkdownFileFilter;
 import scene.markdown.MarkdownReader;
 import scene.markdown.MarkdownWriter;
@@ -19,6 +20,10 @@ public class EditorPanel extends Workspace {
         super("Source");
         Workspaces.connect(this);
 
+        JLabel savedIndicator = new JLabel();
+        getHeader().add(savedIndicator, BorderLayout.EAST);
+
+
 
 
         addSignal(new OpenFileSignal(){
@@ -30,13 +35,16 @@ public class EditorPanel extends Workspace {
                 if(file != null){
                     SceneManager.setFile(file);
                     MarkdownReader.load(file, textEditor.getDocument());
+                    SceneManager.getFrame().setTitle(SceneManager.getFile().getName());
+                    savedIndicator.setIcon(new FlatFileViewFileIcon());
                 }
-
-
             }
         });
 
-        Timer timer = new Timer(1000, e -> getSignal(SaveFileSignal.class).save());
+        Timer timer = new Timer(1000, e -> {
+            getSignal(SaveFileSignal.class).save();
+            savedIndicator.setText("");
+        });
 
         timer.setRepeats(false);
 
@@ -50,6 +58,7 @@ public class EditorPanel extends Workspace {
                     return;
                 }
 
+                savedIndicator.setText("Saving...");
                 timer.restart();
             }
         });

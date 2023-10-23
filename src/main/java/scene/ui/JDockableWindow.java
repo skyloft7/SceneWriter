@@ -17,10 +17,10 @@ public class JDockableWindow extends JPanel {
     private Dimension vPreferredSize, hPreferredSize, windowPreferredSize;
     private int amnestySize = 50;
     private String title;
-
     private JDialog window;
-
+    private JLabel titleText;
     private boolean windowMode;
+    private JPanel header = new JPanel();
 
     public JDockableWindow(String title){
         this.title = title;
@@ -47,7 +47,7 @@ public class JDockableWindow extends JPanel {
 
         setLayout(new BorderLayout());
 
-        JPanel header = new JPanel();
+
 
 
 
@@ -56,7 +56,8 @@ public class JDockableWindow extends JPanel {
 
 
         header.setLayout(new BorderLayout());
-        JLabel titleText = new JLabel(title);
+        titleText = new JLabel(title);
+        titleText.setFont(new Font(titleText.getFont().getFontName(), Font.ITALIC, titleText.getFont().getSize()));
         titleText.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
 
         header.add(titleText, BorderLayout.WEST);
@@ -340,9 +341,17 @@ public class JDockableWindow extends JPanel {
         return windowMode;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+        titleText.setText(title);
+    }
 
     public String getTitle() {
         return title;
+    }
+
+    public JPanel getHeader() {
+        return header;
     }
 
     public JDialog getWindow() {

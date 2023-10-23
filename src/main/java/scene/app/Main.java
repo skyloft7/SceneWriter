@@ -137,6 +137,8 @@ public class Main {
                 }
             });
 
+            SceneManager.setFrame(jFrame);
+
 
 
 
