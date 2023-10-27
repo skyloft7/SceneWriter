@@ -124,6 +124,56 @@ public class Spellchecker {
             }
         }
 
+        //Removing stale highlights
+        {
+
+            synchronized (spellingErrors) {
+
+                int line = textEditor
+                        .getDocument()
+                        .getDefaultRootElement()
+                        .getElementIndex(textEditor.getCaretPosition());
+
+                ArrayList<SpellingError> invalidErrors = new ArrayList<>();
+
+
+                for (SpellingError spellingError : spellingErrors) {
+                    if (spellingError.line != line) continue;
+
+
+                    if (!isValidError(spellingError, matches, element)) {
+
+                        try {
+                            System.out.println("Removing " + textEditor.getText(spellingError.getStartOffset(), spellingError.getEndOffset() - spellingError.getStartOffset()));
+
+
+
+                            SwingUtilities.invokeAndWait(() -> {
+                                textEditor.getHighlighter().removeHighlight(spellingError.highlight);
+                                textEditor.repaint();
+                            });
+
+                            invalidErrors.add(spellingError);
+                            break;
+                        } catch (BadLocationException | InvocationTargetException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
+                for (SpellingError s : invalidErrors) {
+                    spellingErrors.remove(s);
+                }
+
+
+            }
+
+
+
+
+
+        }
+
 
 
         //Creating Highlights
@@ -147,18 +197,14 @@ public class Spellchecker {
                 if (!spellingErrors.contains(spellingError)) {
                     spellingErrors.add(spellingError);
 
-                    try {
-                        SwingUtilities.invokeAndWait(() -> {
-                            try {
-                                spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
-                            } catch (BadLocationException e) {
-                                throw new RuntimeException(e);
-                            }
-                            textEditor.repaint();
-                        });
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
+                        } catch (BadLocationException e) {
+                            throw new RuntimeException(e);
+                        }
+                        textEditor.repaint();
+                    });
 
                     System.out.println("New Error");
                 }
@@ -166,62 +212,6 @@ public class Spellchecker {
 
             }
         }
-
-        //Removing stale highlights
-        {
-
-        synchronized (spellingErrors) {
-
-            int line = textEditor
-                    .getDocument()
-                    .getDefaultRootElement()
-                    .getElementIndex(textEditor.getCaretPosition());
-
-            ArrayList<SpellingError> invalidErrors = new ArrayList<>();
-
-
-            for (SpellingError spellingError : spellingErrors) {
-                if (spellingError.line != line) continue;
-
-
-                if (!isValidError(spellingError, matches, element)) {
-
-                    try {
-                        System.out.println("Removing " + textEditor.getText(spellingError.getStartOffset(), spellingError.getEndOffset() - spellingError.getStartOffset()));
-
-                        SwingUtilities.invokeLater(() -> {
-                            textEditor.getHighlighter().removeHighlight(spellingError.highlight);
-                            textEditor.repaint();
-                        });
-
-                        invalidErrors.add(spellingError);
-                        break;
-                    } catch (BadLocationException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-
-            for (SpellingError s : invalidErrors) {
-                spellingErrors.remove(s);
-            }
-
-
-        }
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-
 
     }
 
