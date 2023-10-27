@@ -11,9 +11,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,7 +32,7 @@ public class Spellchecker {
         SwingWorker swingWorker = new SwingWorker() {
             @Override
             protected Object doInBackground() {
-
+                Thread.currentThread().setName("Spellchecker");
 
                 JLanguageTool languageTool = new JLanguageTool(Languages.getLanguageForShortCode("en-GB"));
 
@@ -56,6 +56,7 @@ public class Spellchecker {
                 }
             }
         };
+
         swingWorker.execute();
     }
 
@@ -88,25 +89,22 @@ public class Spellchecker {
                 spellingError.line = root.getElementIndex(ruleMatch.getFromPos());
                 spellingError.suggestions = ruleMatch.getSuggestedReplacements();
 
-                if(!spellingErrors.contains(spellingError)){
-                    spellingErrors.add(spellingError);
+                spellingErrors.add(spellingError);
 
-                    SwingUtilities.invokeLater(() -> {
-                        try {
-                            spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(ruleMatch.getFromPos(), ruleMatch.getToPos(), errorHighlighter);
-                        } catch (BadLocationException e) {
-                            throw new RuntimeException(e);
-                        }
-                        textEditor.repaint();
-                    });
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(ruleMatch.getFromPos(), ruleMatch.getToPos(), errorHighlighter);
+                    } catch (BadLocationException e) {
+                        throw new RuntimeException(e);
+                    }
+                    textEditor.repaint();
+                });
 
-                }
             }
         }
     }
 
     private void spellcheckLine(JLanguageTool languageTool, JTextEditor textEditor) {
-
         Element element = UIUtil.currentLine(textEditor);
         String currentLineText;
         List<RuleMatch> matches;
@@ -125,6 +123,7 @@ public class Spellchecker {
                 throw new RuntimeException(e);
             }
         }
+
 
 
         //Creating Highlights
@@ -148,14 +147,18 @@ public class Spellchecker {
                 if (!spellingErrors.contains(spellingError)) {
                     spellingErrors.add(spellingError);
 
-                    SwingUtilities.invokeLater(() -> {
-                        try {
-                            spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
-                        } catch (BadLocationException e) {
-                            throw new RuntimeException(e);
-                        }
-                        textEditor.repaint();
-                    });
+                    try {
+                        SwingUtilities.invokeAndWait(() -> {
+                            try {
+                                spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
+                            } catch (BadLocationException e) {
+                                throw new RuntimeException(e);
+                            }
+                            textEditor.repaint();
+                        });
+                    } catch (InterruptedException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     System.out.println("New Error");
                 }
@@ -164,45 +167,85 @@ public class Spellchecker {
             }
         }
 
-
-        //Remove stale highlights
+        //Removing stale highlights
         {
 
+        synchronized (spellingErrors) {
 
-            if(matches.isEmpty()) return;
+            int line = textEditor
+                    .getDocument()
+                    .getDefaultRootElement()
+                    .getElementIndex(textEditor.getCaretPosition());
+
+            ArrayList<SpellingError> invalidErrors = new ArrayList<>();
 
 
+            for (SpellingError spellingError : spellingErrors) {
+                if (spellingError.line != line) continue;
 
-            Element root = textEditor.getDocument().getDefaultRootElement();
 
-            for (Iterator<SpellingError> iterator = spellingErrors.iterator(); iterator.hasNext(); ) {
-                SpellingError spellingError = iterator.next();
-                if (spellingError.line == root.getElementIndex(textEditor.getCaretPosition())) {
+                if (!isValidError(spellingError, matches, element)) {
 
-                    if (!isValidError(spellingError, matches, element)) {
+                    try {
+                        System.out.println("Removing " + textEditor.getText(spellingError.getStartOffset(), spellingError.getEndOffset() - spellingError.getStartOffset()));
+
                         SwingUtilities.invokeLater(() -> {
                             textEditor.getHighlighter().removeHighlight(spellingError.highlight);
                             textEditor.repaint();
                         });
 
-                        iterator.remove();
+                        invalidErrors.add(spellingError);
+                        break;
+                    } catch (BadLocationException e) {
+                        throw new RuntimeException(e);
                     }
-
-
-
                 }
             }
 
+            for (SpellingError s : invalidErrors) {
+                spellingErrors.remove(s);
+            }
 
+
+        }
 
 
 
 
 
         }
+
+
+
+
+
+
+
+
+
     }
 
     private boolean isValidError(SpellingError spellingError, List<RuleMatch> matches, Element element){
+
+
+        /*
+        This has a problem:
+
+        This has an eror in typing
+
+        This has an error in typing
+
+        Because a new letter was added, all the errors next to it are invalidated because their start/end indexes don't match anymore
+
+        The RuleMatch indexes need to be updated!
+
+
+
+         */
+
+
+
+
         for (RuleMatch match : matches) {
             int startOffset = element.getStartOffset() + match.getFromPos();
             int endOffset = element.getStartOffset() + match.getToPos();
@@ -216,6 +259,8 @@ public class Spellchecker {
     }
 
     public void updateAll(String entireText){
+
+
 
         updateAllLock.lock();
 
