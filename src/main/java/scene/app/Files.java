@@ -25,7 +25,6 @@ public class Files {
     }
 
     public static void saveFile(File path, String text) {
-        System.out.println(Thread.currentThread().getName());
 
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path));

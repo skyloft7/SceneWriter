@@ -97,7 +97,6 @@ public class Serializer {
             ConfigurationSection projectInfo = preferencesFile.getConfigurationSection("Files");
             File projectFile = new File(projectInfo.getString("Project"));
 
-            System.out.println(projectFile);
 
             if(projectFile.exists()) {
                 SceneManager.setFile(projectFile);
