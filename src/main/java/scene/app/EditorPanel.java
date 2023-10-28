@@ -1,6 +1,5 @@
 package scene.app;
 
-import com.formdev.flatlaf.icons.FlatFileViewFileIcon;
 import scene.markdown.MarkdownFileFilter;
 import scene.markdown.MarkdownReader;
 import scene.markdown.MarkdownWriter;
@@ -20,8 +19,6 @@ public class EditorPanel extends Workspace {
         super("Source");
         Workspaces.connect(this);
 
-        JLabel savedIndicator = new JLabel();
-        getHeader().add(savedIndicator, BorderLayout.EAST);
 
 
 
@@ -36,16 +33,15 @@ public class EditorPanel extends Workspace {
             public void open(File file) {
                 if(file != null){
                     SceneManager.setFile(file);
-                    MarkdownReader.load(file, textEditor.getDocument());
+                    MarkdownReader.load(file, textEditor);
                     SceneManager.getFrame().setTitle(SceneManager.getFile().getName());
-                    savedIndicator.setIcon(new FlatFileViewFileIcon());
+
                 }
             }
         });
 
         Timer timer = new Timer(1000, e -> {
             getSignal(SaveFileSignal.class).save();
-            savedIndicator.setText("");
         });
 
         timer.setRepeats(false);
@@ -60,7 +56,7 @@ public class EditorPanel extends Workspace {
                     return;
                 }
 
-                savedIndicator.setText("Saving...");
+
                 timer.restart();
             }
         });
@@ -70,8 +66,6 @@ public class EditorPanel extends Workspace {
             public void save() {
                 //There is a file already opened
                 if(SceneManager.getFile() != null){
-
-                    System.out.println("Windows Line Ending: " + textEditor.getText().contains("\r"));
 
                     MarkdownWriter.write(SceneManager.getFile(), textEditor.getText());
                 }
@@ -88,14 +82,15 @@ public class EditorPanel extends Workspace {
         });
 
 
-
-
-        add(new JTextEditorScrollPane(
-                        textEditor,
+        JTextEditorScrollPane comp = new JTextEditorScrollPane(
+                textEditor,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
-            BorderLayout.CENTER
-        );
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+
+        add(comp, BorderLayout.CENTER);
+
+
 
 
 
