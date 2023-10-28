@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Spellchecker {
@@ -88,6 +89,11 @@ public class Spellchecker {
 
                 spellingError.line = root.getElementIndex(ruleMatch.getFromPos());
                 spellingError.suggestions = ruleMatch.getSuggestedReplacements();
+                try {
+                    spellingError.text = textEditor.getText(spellingError.getStartOffset(), spellingError.getEndOffset() - spellingError.getStartOffset());
+                } catch (BadLocationException e) {
+                    throw new RuntimeException(e);
+                }
 
                 spellingErrors.add(spellingError);
 
@@ -112,61 +118,53 @@ public class Spellchecker {
 
 
 
+
         //LanguageTool check
         {
             try {
                 currentLineText = textEditor.getText(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
                 if(SystemInfo.isWindows)
                     currentLineText = currentLineText.replaceAll("\r\n", "\n");
+
+                //This is not the currentLine! Everything's all jumbled together!
                 matches = languageTool.check(currentLineText);
             } catch (IOException | BadLocationException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        int line = textEditor
+                .getDocument()
+                .getDefaultRootElement()
+                .getElementIndex(textEditor.getCaretPosition());
+
         //Removing stale highlights
         {
 
-            synchronized (spellingErrors) {
 
-                int line = textEditor
-                        .getDocument()
-                        .getDefaultRootElement()
-                        .getElementIndex(textEditor.getCaretPosition());
+            Optional<SpellingError> stale = Optional.empty();
 
-                ArrayList<SpellingError> invalidErrors = new ArrayList<>();
+            for (SpellingError spellingError : spellingErrors) {
+                if (spellingError.line != line) continue;
 
 
-                for (SpellingError spellingError : spellingErrors) {
-                    if (spellingError.line != line) continue;
+                if (!isValidError(spellingError, matches, element)) {
+                    try {
+                        SwingUtilities.invokeAndWait(() -> {
+                            textEditor.getHighlighter().removeHighlight(spellingError.highlight);
+                            textEditor.repaint();
+                        });
 
+                        stale = Optional.of(spellingError);
 
-                    if (!isValidError(spellingError, matches, element)) {
-
-                        try {
-                            System.out.println("Removing " + textEditor.getText(spellingError.getStartOffset(), spellingError.getEndOffset() - spellingError.getStartOffset()));
-
-
-
-                            SwingUtilities.invokeAndWait(() -> {
-                                textEditor.getHighlighter().removeHighlight(spellingError.highlight);
-                                textEditor.repaint();
-                            });
-
-                            invalidErrors.add(spellingError);
-                            break;
-                        } catch (BadLocationException | InvocationTargetException | InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+                        break;
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-
-                for (SpellingError s : invalidErrors) {
-                    spellingErrors.remove(s);
-                }
-
-
             }
+
+            stale.ifPresent(spellingError -> spellingErrors.remove(spellingError));
 
 
 
@@ -180,10 +178,7 @@ public class Spellchecker {
         {
 
             for (RuleMatch match : matches) {
-                int line = textEditor
-                        .getDocument()
-                        .getDefaultRootElement()
-                        .getElementIndex(textEditor.getCaretPosition());
+
 
                 int start = element.getStartOffset() + match.getFromPos();
                 int end = element.getStartOffset() + match.getToPos();
@@ -196,7 +191,6 @@ public class Spellchecker {
 
                 if (!spellingErrors.contains(spellingError)) {
                     spellingErrors.add(spellingError);
-
                     SwingUtilities.invokeLater(() -> {
                         try {
                             spellingError.highlight = (Highlighter.Highlight) textEditor.getHighlighter().addHighlight(start, end, errorHighlighter);
@@ -205,9 +199,8 @@ public class Spellchecker {
                         }
                         textEditor.repaint();
                     });
-
-                    System.out.println("New Error");
                 }
+
 
 
             }
@@ -217,33 +210,22 @@ public class Spellchecker {
 
     private boolean isValidError(SpellingError spellingError, List<RuleMatch> matches, Element element){
 
-
-        /*
-        This has a problem:
-
-        This has an eror in typing
-
-        This has an error in typing
-
-        Because a new letter was added, all the errors next to it are invalidated because their start/end indexes don't match anymore
-
-        The RuleMatch indexes need to be updated!
-
-
-
-         */
-
-
-
-
         for (RuleMatch match : matches) {
             int startOffset = element.getStartOffset() + match.getFromPos();
             int endOffset = element.getStartOffset() + match.getToPos();
 
-            if (startOffset == spellingError.getStartOffset() && endOffset == spellingError.getEndOffset()) {
+            if (startOffset == spellingError.getStartOffset() && endOffset == spellingError.getEndOffset())
                 return true;
-            }
         }
+
+
+
+
+
+
+
+
+
 
         return false;
     }

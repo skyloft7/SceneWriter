@@ -10,6 +10,7 @@ public class SpellingError {
     public Highlighter.Highlight highlight;
     public int line;
     public List<String> suggestions;
+    public String text;
 
 
     public SpellingError(int startOffsetDoc, int endOffsetDoc, String message){

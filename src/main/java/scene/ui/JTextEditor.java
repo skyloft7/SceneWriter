@@ -22,14 +22,11 @@ public class JTextEditor extends JTextPane {
 
     private UndoManager manager = new UndoManager();
     private ArrayList<Note> notes = new ArrayList<>();
-
     private DefaultHighlighter.DefaultHighlightPainter noteHighlighter;
     private PopupLifetimeManager popupLifetimeManager = new PopupLifetimeManager();
     private MutableAttributeSet cursorAttributes = new SimpleAttributeSet();
     private Analyzer analyzer = new Analyzer();
     private Spellchecker spellchecker = new Spellchecker();
-
-
     public JTextEditor() {
         super();
         setStyledDocument(new TextDocument());
@@ -338,19 +335,17 @@ public class JTextEditor extends JTextPane {
                 }
             });
 
-            addMouseListener(new MouseAdapter() {
+            addKeyListener(new KeyAdapter() {
                 @Override
-                public void mousePressed(MouseEvent e) {
-                    int pos = viewToModel2D(e.getPoint());
+                public void keyPressed(KeyEvent e) {
+                    if(e.isAltDown() && e.getKeyCode() == VK_ENTER){
 
-                    if(e.isControlDown() && SwingUtilities.isLeftMouseButton(e)) {
+                        int pos = getCaretPosition();
 
                         for (SpellingError spellingError : spellchecker.getErrors()) {
                             if (pos >= spellingError.highlight.getStartOffset() && pos <= spellingError.highlight.getEndOffset())
-                                showSpellcheckErrorPopup(e.getPoint(), spellingError);
+                                showSpellcheckErrorPopup(getCaret().getMagicCaretPosition(), spellingError);
                         }
-
-
                     }
                 }
             });
@@ -363,9 +358,18 @@ public class JTextEditor extends JTextPane {
 
 
 
+
+
+
         }
 
+    }
 
+    @Override
+    public void setText(String t) {
+        super.setText(t);
+
+        spellchecker.updateAll(t);
     }
 
     @Override
