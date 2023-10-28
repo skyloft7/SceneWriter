@@ -18,9 +18,12 @@ public class JDockableWindow extends JPanel {
     private int amnestySize = 50;
     private String title;
     private JDialog window;
-    private JLabel titleText;
     private boolean windowMode;
-    private JPanel header = new JPanel();
+
+    private ResizeListener resizeListener = resizeAxis -> {
+        if (resizeAxis == ResizeListener.ResizeAxis.HORIZONTAL) hPreferredSize = getSize();
+        if (resizeAxis == ResizeListener.ResizeAxis.VERTICAL) vPreferredSize = getSize();
+    };
 
     public JDockableWindow(String title){
         this.title = title;
@@ -29,41 +32,7 @@ public class JDockableWindow extends JPanel {
         hPreferredSize = new Dimension(getPreferredSize().width + amnestySize, getPreferredSize().height);
 
         ComponentResizer componentResizer = new ComponentResizer();
-
-
-
-        componentResizer.registerComponent(this, resizeAxis -> {
-            if(resizeAxis == ResizeListener.ResizeAxis.HORIZONTAL){
-                hPreferredSize = getSize();
-            }
-            if(resizeAxis == ResizeListener.ResizeAxis.VERTICAL){
-                vPreferredSize = getSize();
-            }
-        });
-
-
-
-
-
-        setLayout(new BorderLayout());
-
-
-
-
-
-
-
-
-
-        header.setLayout(new BorderLayout());
-        titleText = new JLabel(title);
-        titleText.setFont(new Font(titleText.getFont().getFontName(), Font.ITALIC, titleText.getFont().getSize()));
-        titleText.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 3));
-
-        header.add(titleText, BorderLayout.WEST);
-
-
-        add(header, BorderLayout.NORTH);
+        componentResizer.registerComponent(this, resizeListener);
         setBorder(new Border() {
             @Override
             public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
@@ -115,17 +84,20 @@ public class JDockableWindow extends JPanel {
                 return false;
             }
         });
+        setLayout(new BorderLayout());
+
+        JPanel dockHeader = new JPanel(new BorderLayout());
+        dockHeader.setBorder(BorderFactory.createEmptyBorder());
+        JLabel label = new JLabel(getTitle());
+
+        label.setFont(new Font(label.getFont().getName(), Font.ITALIC | Font.BOLD, label.getFont().getSize()));
 
 
+        dockHeader.add(label, BorderLayout.EAST);
+        add(dockHeader, BorderLayout.NORTH);
 
 
-
-
-
-
-
-
-        addMouseMotionListener(new MouseMotionAdapter() {
+        dockHeader.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
                 super.mouseDragged(e);
@@ -137,7 +109,7 @@ public class JDockableWindow extends JPanel {
             }
         });
 
-        addMouseListener(new MouseAdapter() {
+        dockHeader.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -147,6 +119,9 @@ public class JDockableWindow extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
+
+
+
 
                 if(getParent() instanceof JDockspace){
                     ((JDockspace) getParent()).hideOverlay();
@@ -214,6 +189,11 @@ public class JDockableWindow extends JPanel {
 
                         Dimension oldSize = getPreferredSize();
 
+
+                        remove(dockHeader);
+                        revalidate();
+                        repaint();
+
                         window.setLayout(new BorderLayout());
                         window.add(JDockableWindow.this);
                         window.setVisible(true);
@@ -225,16 +205,14 @@ public class JDockableWindow extends JPanel {
                         window.addWindowListener(new WindowAdapter() {
                             @Override
                             public void windowClosing(WindowEvent e) {
+
+                                add(dockHeader, BorderLayout.NORTH);
+                                revalidate();
+                                repaint();
+
                                 JDockableWindow.this.setPreferredSize(window.getSize());
 
-                                componentResizer.registerComponent(JDockableWindow.this, resizeAxis -> {
-                                    if(resizeAxis == ResizeListener.ResizeAxis.HORIZONTAL){
-                                        hPreferredSize = getSize();
-                                    }
-                                    if(resizeAxis == ResizeListener.ResizeAxis.VERTICAL){
-                                        vPreferredSize = getSize();
-                                    }
-                                });
+                                componentResizer.registerComponent(JDockableWindow.this, resizeListener);
 
                                 setPreferredSize(oldSize);
                                 parent.add(JDockableWindow.this, myDockspacePos);
@@ -258,6 +236,8 @@ public class JDockableWindow extends JPanel {
 
             }
         });
+
+
     }
 
 
@@ -315,6 +295,10 @@ public class JDockableWindow extends JPanel {
         }
     }
 
+    @Override
+    public boolean isOptimizedDrawingEnabled() {
+        return false;
+    }
 
     public Dimension getVerticallyDockedPreferredSize() {
         return vPreferredSize;
@@ -343,16 +327,12 @@ public class JDockableWindow extends JPanel {
 
     public void setTitle(String title) {
         this.title = title;
-        titleText.setText(title);
     }
 
     public String getTitle() {
         return title;
     }
 
-    public JPanel getHeader() {
-        return header;
-    }
 
     public JDialog getWindow() {
         return window;
