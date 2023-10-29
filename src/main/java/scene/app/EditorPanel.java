@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 public class EditorPanel extends Workspace {
 
@@ -29,15 +30,41 @@ public class EditorPanel extends Workspace {
                 open(FileChoosers.showOpenDialog(MarkdownFileFilter.filter));
             }
 
+
+            @Override
+            public void openNew() {
+                File file = FileChoosers.showCreateDialog(MarkdownFileFilter.filter);
+
+
+                try {
+                    file.getParentFile().mkdirs();
+                    file.createNewFile();
+                }
+                catch (IOException e) {
+                    System.err.println("Not allowed to create file " + file.getName() + ". do you have permissions?");
+                    throw new RuntimeException(e);
+                }
+
+
+                open(file);
+            }
+
             @Override
             public void open(File file) {
                 if(file != null){
                     SceneManager.setFile(file);
                     MarkdownReader.load(file, textEditor);
                     SceneManager.getFrame().setTitle(SceneManager.getFile().getName());
-
                 }
             }
+
+
+
+
+
+
+
+
         });
 
         Timer timer = new Timer(1000, e -> {
@@ -66,18 +93,8 @@ public class EditorPanel extends Workspace {
             public void save() {
                 //There is a file already opened
                 if(SceneManager.getFile() != null){
-
                     MarkdownWriter.write(SceneManager.getFile(), textEditor.getText());
                 }
-
-                //The user just opened Scene and started typing like
-                //some kind of monster
-                else {
-
-                }
-
-
-
             }
         });
 
@@ -99,8 +116,9 @@ public class EditorPanel extends Workspace {
 
     public static class OpenFileSignal implements WorkspaceSignal {
         public void open(){}
-
         public void open(File file){}
+
+        public void openNew(){}
     }
 
     public static class SaveFileSignal implements WorkspaceSignal {

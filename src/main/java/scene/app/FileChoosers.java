@@ -2,6 +2,7 @@ package scene.app;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 
@@ -50,5 +51,24 @@ public class FileChoosers {
 
     public static void setCurrentPath(File currentPath) {
         FileChoosers.currentPath = currentPath;
+    }
+
+    public static File showCreateDialog(FileNameExtensionFilter fileFilter) {
+        JFileChooser jFileChooser = new JFileChooser(currentPath);
+        if(fileFilter != null) jFileChooser.setFileFilter(fileFilter);
+
+        jFileChooser.setApproveButtonText("Create!");
+
+        if(jFileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            currentPath = jFileChooser.getSelectedFile().getParentFile();
+            return jFileChooser.getSelectedFile();
+        }
+
+
+        return null;
+    }
+
+    public static File showCreateDialog(){
+        return showCreateDialog(null);
     }
 }

@@ -6,11 +6,9 @@ import com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme;
 import flatlaf.FlatLafUtils;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
-import scene.ui.MenuAdapter;
 import scene.ui.UIUtil;
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -55,18 +53,31 @@ public class Main {
             JMenuBar jMenuBar = new JMenuBar();
             {
 
-                JMenu open = new JMenu("Open");
+                JMenu file = new JMenu("File");
                 {
-                    open.addMenuListener(new MenuAdapter(){
-                        @Override
-                        public void menuSelected(MenuEvent e) {
-                            Workspaces.get("Source")
-                                    .getSignal(EditorPanel.OpenFileSignal.class)
-                                    .open();
-                        }
-                    });
+
+
+                    JMenuItem create = new JMenuItem("Create");
+                    {
+                        create.addActionListener(e -> Workspaces.get("Source")
+                                .getSignal(EditorPanel.OpenFileSignal.class)
+                                .openNew());
+
+                    }
+                    file.add(create);
+
+                    JMenuItem open = new JMenuItem("Open");
+                    {
+                        open.addActionListener(e -> Workspaces.get("Source")
+                                .getSignal(EditorPanel.OpenFileSignal.class)
+                                .open());
+                    }
+                    file.add(open);
+
+
+
                 }
-                jMenuBar.add(open);
+                jMenuBar.add(file);
 
                 JMenu settings = new JMenu("Settings");
                 {
