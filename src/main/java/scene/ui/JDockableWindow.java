@@ -1,6 +1,5 @@
 package scene.ui;
 
-import flatlaf.FlatLafUtils;
 import thirdparty.ComponentResizer;
 
 import javax.swing.*;
@@ -45,9 +44,9 @@ public class JDockableWindow extends JPanel {
 
 
                 graphics2D.setStroke(new BasicStroke(3));
-                graphics2D.setColor(FlatLafUtils.accentColor);
+                graphics2D.setColor(Color.LIGHT_GRAY);
 
-                int offset = 10;
+                int offset = 5;
 
 
                 if(getDockPos().equals(BorderLayout.WEST)){
@@ -76,7 +75,17 @@ public class JDockableWindow extends JPanel {
 
             @Override
             public Insets getBorderInsets(Component c) {
-                return new Insets(4, 4, 4, 4);
+
+                Insets insets = new Insets(0, 0, 0, 0);
+                int inset = 3;
+
+                if(getDockPos().equals(BorderLayout.WEST)) insets.right = inset;
+                if(getDockPos().equals(BorderLayout.EAST)) insets.left = inset;
+                if(getDockPos().equals(BorderLayout.NORTH)) insets.bottom = inset;
+                if(getDockPos().equals(BorderLayout.SOUTH)) insets.top = inset;
+
+
+                return insets;
             }
 
             @Override
@@ -84,18 +93,16 @@ public class JDockableWindow extends JPanel {
                 return false;
             }
         });
+
+
         setLayout(new BorderLayout());
 
         JPanel dockHeader = new JPanel(new BorderLayout());
-        dockHeader.setBorder(BorderFactory.createEmptyBorder());
-        JLabel label = new JLabel(getTitle());
+        dockHeader.add(new JLabel(getTitle()), BorderLayout.CENTER);
+        dockHeader.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        dockHeader.setBackground(Color.LIGHT_GRAY);
 
-        label.setFont(new Font(label.getFont().getName(), Font.ITALIC | Font.BOLD, label.getFont().getSize()));
-
-
-        dockHeader.add(label, BorderLayout.EAST);
         add(dockHeader, BorderLayout.NORTH);
-
 
         dockHeader.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -108,7 +115,6 @@ public class JDockableWindow extends JPanel {
 
             }
         });
-
         dockHeader.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -336,5 +342,9 @@ public class JDockableWindow extends JPanel {
 
     public JDialog getWindow() {
         return window;
+    }
+
+    public void dockOver() {
+
     }
 }

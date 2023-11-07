@@ -24,6 +24,7 @@ public class JDockspace extends JPanel {
         add(jDockableWindow, args);
         jDockableWindow.setRequiredDockDistance(dockDistance);
         windows.put(jDockableWindow.getTitle(), jDockableWindow);
+        jDockableWindow.dockOver();
     }
 
 
