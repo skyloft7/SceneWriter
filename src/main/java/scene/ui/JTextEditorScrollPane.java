@@ -19,6 +19,10 @@ public class JTextEditorScrollPane extends JScrollPane {
 
     public JTextEditorScrollPane(JTextEditor textEditor, int vsbPolicy, int hsbPolicy) {
         super(textEditor, vsbPolicy, hsbPolicy);
+        setBorder(null);
+
+
+
         this.editor = textEditor;
         this.previewImage = new PreviewImage(textEditor);
 

@@ -8,6 +8,7 @@ import scene.app.Popups;
 import scene.app.SpellingError;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
@@ -35,6 +36,7 @@ public class JTextEditor extends JTextPane {
         noteHighlighter = new DefaultHighlighter.DefaultHighlightPainter(FlatLafUtils.accentColor);
 
         StyleConstants.setFontFamily(cursorAttributes, getFont().getFamily());
+
 
 
 
@@ -363,6 +365,36 @@ public class JTextEditor extends JTextPane {
 
         }
 
+        //UI
+        {
+
+            Color background = new Color(0x202020);
+            Color caretColor = Color.WHITE;
+
+
+            setBorder(new Border() {
+                @Override
+                public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+
+                }
+
+                @Override
+                public Insets getBorderInsets(Component c) {
+                    return new Insets(10, 10, 10, 10);
+                }
+
+                @Override
+                public boolean isBorderOpaque() {
+                    return true;
+                }
+            });
+            setBackground(background);
+            setForeground(caretColor);
+            setCaretColor(caretColor);
+        }
+
+
+
     }
 
     @Override
@@ -500,6 +532,10 @@ public class JTextEditor extends JTextPane {
 
     public ArrayList<Note> getNotes() {
         return notes;
+    }
+
+    public void updateSpellcheck() {
+        spellchecker.updateAll(getText());
     }
 
 
