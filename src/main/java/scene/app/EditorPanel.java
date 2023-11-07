@@ -17,7 +17,7 @@ public class EditorPanel extends Workspace {
 
     private JTextEditor textEditor = new JTextEditor();
     public EditorPanel() {
-        super("Source");
+        super("Novel Editor");
         Workspaces.connect(this);
 
 
@@ -91,9 +91,13 @@ public class EditorPanel extends Workspace {
         addSignal(new SaveFileSignal(){
             @Override
             public void save() {
+
+                System.out.println("calling save...");
+
+
                 //There is a file already opened
                 if(SceneManager.getFile() != null){
-                    MarkdownWriter.write(SceneManager.getFile(), textEditor.getText());
+                    MarkdownWriter.write(SceneManager.getFile(), textEditor.getDocument());
                 }
             }
         });

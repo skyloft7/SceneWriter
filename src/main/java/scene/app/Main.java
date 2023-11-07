@@ -1,12 +1,9 @@
 package scene.app;
 
-import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme;
 import flatlaf.FlatLafUtils;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
-import scene.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,7 +56,7 @@ public class Main {
 
                     JMenuItem create = new JMenuItem("Create");
                     {
-                        create.addActionListener(e -> Workspaces.get("Source")
+                        create.addActionListener(e -> Workspaces.get("Novel Editor")
                                 .getSignal(EditorPanel.OpenFileSignal.class)
                                 .openNew());
 
@@ -68,7 +65,7 @@ public class Main {
 
                     JMenuItem open = new JMenuItem("Open");
                     {
-                        open.addActionListener(e -> Workspaces.get("Source")
+                        open.addActionListener(e -> Workspaces.get("Novel Editor")
                                 .getSignal(EditorPanel.OpenFileSignal.class)
                                 .open());
                     }
@@ -81,32 +78,17 @@ public class Main {
 
                 JMenu settings = new JMenu("Settings");
                 {
-                    JCheckBoxMenuItem darkMode = new JCheckBoxMenuItem("Dark Mode");
-                    {
-                        darkMode.setSelected(FlatLaf.isLafDark());
-                        darkMode.addActionListener(e -> {
 
-                            if (darkMode.isSelected()) FlatGradiantoDeepOceanIJTheme.setup();
-                            else FlatLightLaf.setup();
-
-                            UIUtil.updateComponentTreeUI(jFrame);
-                            jFrame.repaint();
-                        });
-
-
-                    }
-                    settings.add(darkMode);
 
                     JCheckBoxMenuItem zenMode = new JCheckBoxMenuItem("Zen Mode");
                     {
 
                         zenMode.addActionListener(e -> {
-
                             SceneManager.setZenMode(zenMode.isSelected());
-
                             GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
                             graphicsDevice.setFullScreenWindow(SceneManager.isZenMode() ? jFrame : null);
                         });
+
                     }
                     settings.add(zenMode);
                 }
@@ -129,8 +111,10 @@ public class Main {
 
 
 
+
                 //Overrides preferredSize
                 jDockspace.addWindow(sourceEditor, BorderLayout.WEST);
+
 
                 sourceEditor.setPreferredSize(new Dimension(sourceEditor.getPreferredSize().width + 400, sourceEditor.getPreferredSize().height));
 

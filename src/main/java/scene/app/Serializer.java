@@ -1,14 +1,10 @@
 package scene.app;
 
-import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 import scene.ui.JDockableWindow;
 import scene.ui.JDockspace;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +21,7 @@ public class Serializer {
 
 
 
-            preferencesFile.set("DarkMode", FlatLaf.isLafDark());
+
             ConfigurationSection dockspacePrefs = preferencesFile.createSection("Dockspace");
 
             for(JDockableWindow jDockableWindow : jDockspace.getWindows().values()){
@@ -36,6 +32,8 @@ public class Serializer {
             }
 
             ConfigurationSection projectInfo = preferencesFile.createSection("Files");
+
+            //SceneManager.getFile() returns null sometimes
             projectInfo.set("Project", SceneManager.getFile().getAbsolutePath());
             projectInfo.set("FilePath", FileChoosers.getCurrentPath().getAbsolutePath());
 
@@ -63,16 +61,7 @@ public class Serializer {
         if(preferencesFile.exists()){
 
 
-            boolean darkMode = preferencesFile.getBoolean("DarkMode");
-            {
 
-                if (darkMode) FlatGradiantoDeepOceanIJTheme.setup();
-                else FlatLightLaf.setup();
-
-                Window window = SwingUtilities.getWindowAncestor(jDockspace);
-                SwingUtilities.updateComponentTreeUI(window);
-                window.repaint();
-            }
 
             ConfigurationSection dockspace = preferencesFile.getConfigurationSection("Dockspace");
             for(JDockableWindow jDockableWindow : jDockspace.getWindows().values()){
@@ -95,17 +84,24 @@ public class Serializer {
             }
 
             ConfigurationSection projectInfo = preferencesFile.getConfigurationSection("Files");
-            File projectFile = new File(projectInfo.getString("Project"));
+
+            if(projectInfo.getString("Project") != null) {
 
 
-            if(projectFile.exists()) {
-                SceneManager.setFile(projectFile);
-                Workspaces.get("Source").getSignal(EditorPanel.OpenFileSignal.class).open(projectFile);
+                File projectFile = new File(projectInfo.getString("Project"));
+
+
+                if (projectFile.exists()) {
+                    SceneManager.setFile(projectFile);
+                    Workspaces.get("Novel Editor").getSignal(EditorPanel.OpenFileSignal.class).open(projectFile);
+                }
             }
+            if(projectInfo.getString("FilePath") != null) {
 
-            File currentPath = new File(projectInfo.getString("FilePath"));
-            if(currentPath.exists()) FileChoosers.setCurrentPath(currentPath);
+                File currentPath = new File(projectInfo.getString("FilePath"));
+                if (currentPath.exists()) FileChoosers.setCurrentPath(currentPath);
 
+            }
 
 
 
